@@ -1,0 +1,9 @@
+{
+    "api_key": "AQ.Ab8RN6Jeh8jA6PVAfJBj-s0e8bxuLsHCNUlKCBuy3xBdhcDw6A",
+    "project_dir": "C:/Users/nvank/Downloads/DNA",
+    "description": "HelixArchive is a high-performance DNA data storage engine written in Rust. The core library (src/lib.rs) encodes binary files into nucleotide sequences (A/C/G/T) using 2-bit mapping, with a GC-content constraint layer that keeps every 32-byte block between 40-60% GC using an LCG-based XOR scrambler. The CLI (src/main.rs) handles encode/decode/demo commands. Next priorities: (1) add a benchmark module using Criterion that measures encode/decode throughput across payload sizes, (2) add a homopolymer run detector that flags consecutive identical bases exceeding length 4 (another real synthesis constraint), (3) implement a FASTA file format exporter so strands can be sent directly to synthesis providers, (4) add a simple run-length statistics report to EncodingStats showing max homopolymer length and GC distribution histogram.",
+    "start_hour": 7,
+    "end_hour": 21,
+    "session_hours": 8,
+    "session_minutes": 25
+}
