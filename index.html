@@ -14,27 +14,76 @@
     main{ max-width:900px; margin:24px auto; padding:20px }
     h1{ font-size:28px; margin-bottom:6px; background:linear-gradient(135deg,#fff 40%,#7c3aed); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent }
     .subtitle{ color:#777; margin-bottom:18px }
-    .tabs{ display:flex; gap:8px; margin-bottom:16px }
-    .tab{ padding:8px 14px; border-radius:999px; border:1px solid #2a2a2a; background:transparent; color:#aaa; cursor:pointer }
+    .tabs{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap }
+    .tab{ padding:8px 14px; border-radius:999px; border:1px solid #2a2a2a; background:transparent; color:#aaa; cursor:pointer; font-family:'Space Grotesk',sans-serif; font-size:14px }
     .tab.active{ background:#7c3aed; border-color:#7c3aed; color:#fff }
+    .tab.tab-radiation{ border-color:#ef4444; color:#f87171 }
+    .tab.tab-radiation.active{ background:#ef4444; border-color:#ef4444; color:#fff }
     .panel{ display:none }
     .panel.active{ display:block }
     .card{ background:#111; border:1px solid #1e1e1e; border-radius:12px; padding:16px; margin-bottom:12px }
-    textarea,input[type=text]{ width:100%; background:#0d0d0d; border:1px solid #222; border-radius:8px; padding:12px; color:#f0f0f0; resize:vertical }
+    .card-label{ font-size:12px; color:#666; margin-bottom:8px }
+    textarea,input[type=text]{ width:100%; background:#0d0d0d; border:1px solid #222; border-radius:8px; padding:12px; color:#f0f0f0; resize:vertical; font-family:'Space Grotesk',sans-serif }
     .output-box{ background:#0d0d0d; border:1px solid #222; border-radius:8px; padding:12px; font-family:monospace; color:#c0c0c0; min-height:56px; word-break:break-all }
-    .btn{ padding:8px 14px; border-radius:999px; border:1px solid #2a2a2a; background:transparent; color:#aaa; cursor:pointer }
+    .btn{ padding:8px 14px; border-radius:999px; border:1px solid #2a2a2a; background:transparent; color:#aaa; cursor:pointer; font-family:'Space Grotesk',sans-serif; font-size:14px }
     .btn.btn-primary{ background:#7c3aed; color:#fff; border-color:#7c3aed }
+    .btn.btn-danger{ background:#ef4444; color:#fff; border-color:#ef4444 }
     .bases-wrap{ display:flex; flex-wrap:wrap; gap:4px; margin-top:8px }
     .base{ width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; font-size:11px; border-radius:4px }
     .b-A{ background:rgba(124,58,237,0.12); color:#a78bfa }
     .b-C{ background:rgba(59,130,246,0.08); color:#93c5fd }
     .b-G{ background:rgba(16,185,129,0.08); color:#6ee7b7 }
     .b-T{ background:rgba(244,63,94,0.08); color:#fda4af }
+    .b-X{ background:rgba(239,68,68,0.15); color:#ef4444 }
+    .b-damaged{ background:rgba(239,68,68,0.2); color:#fca5a5; outline:1px solid rgba(239,68,68,0.5) }
     .stats-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px }
     .stat-box{ background:#111; border:1px solid #1e1e1e; border-radius:8px; padding:10px; text-align:center }
     .stat-num{ font-weight:700; font-size:16px }
     .stat-name{ font-size:11px; color:#666 }
     .error{ color:#f87171 }
+    .good{ color:#6ee7b7 }
+    .warn{ color:#fbbf24 }
+    .danger{ color:#f87171 }
+
+    /* Radiation tab specific */
+    .rad-controls{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px }
+    @media(max-width:600px){ .rad-controls{ grid-template-columns:1fr } }
+    .rad-label{ font-size:12px; color:#666; margin-bottom:6px }
+    .env-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:8px }
+    .env-btn{ padding:10px 12px; border-radius:8px; border:1px solid #2a2a2a; background:#0d0d0d; color:#aaa; cursor:pointer; font-family:'Space Grotesk',sans-serif; font-size:12px; text-align:left; transition:border-color 0.15s,background 0.15s }
+    .env-btn:hover{ border-color:#444 }
+    .env-btn.active{ border-color:#ef4444; background:rgba(239,68,68,0.08); color:#fca5a5 }
+    .env-btn .env-name{ font-weight:600; font-size:13px; display:block; margin-bottom:3px }
+    .env-btn .env-desc{ font-size:10px; color:#555; line-height:1.3 }
+    .env-btn.active .env-desc{ color:#888 }
+    .duration-wrap{ display:flex; flex-direction:column; gap:8px }
+    .duration-slider{ width:100%; accent-color:#ef4444; cursor:pointer }
+    .duration-display{ font-size:22px; font-weight:700; color:#fff }
+    .duration-unit{ font-size:12px; color:#555; margin-left:4px }
+
+    .rad-summary{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px }
+    .rad-stat{ background:#0d0d0d; border:1px solid #1e1e1e; border-radius:8px; padding:10px; text-align:center }
+    .rad-stat .num{ font-size:18px; font-weight:700 }
+    .rad-stat .lbl{ font-size:10px; color:#555; margin-top:2px }
+
+    .recovery-banner{ border-radius:8px; padding:12px 16px; margin-bottom:12px; font-size:13px; line-height:1.5 }
+    .recovery-banner.ok{ background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2); color:#6ee7b7 }
+    .recovery-banner.bad{ background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); color:#fca5a5 }
+
+    .comparison-row{ display:flex; gap:4px; align-items:center; margin-bottom:3px; font-family:monospace; font-size:12px }
+    .comparison-original{ color:#555 }
+    .comparison-result{ color:#c0c0c0 }
+    .comparison-result.changed{ color:#f87171; font-weight:700 }
+    .comparison-result.unreadable{ color:#ef4444; font-weight:700 }
+    .comparison-arrow{ color:#333; margin:0 4px }
+
+    .seq-wrap{ font-family:monospace; font-size:12px; line-height:1.8; word-break:break-all; background:#0d0d0d; border:1px solid #1e1e1e; border-radius:8px; padding:12px }
+    .seq-base{ display:inline }
+    .seq-damaged{ color:#f87171; background:rgba(239,68,68,0.12); border-radius:2px; padding:0 1px }
+    .seq-unreadable{ color:#ef4444; background:rgba(239,68,68,0.2); border-radius:2px; padding:0 1px; font-weight:700 }
+    .seq-ok{ color:#555 }
+
+    .rad-input-note{ font-size:11px; color:#555; margin-top:6px }
   </style>
 </head>
 <body>
@@ -51,6 +100,7 @@
       <button class="tab" data-tab="decode">decode</button>
       <button class="tab" data-tab="analyze">analyze</button>
       <button class="tab" data-tab="trace">trace</button>
+      <button class="tab tab-radiation" data-tab="radiation">☢ radiation</button>
     </div>
 
     <!-- ENCODE -->
@@ -65,7 +115,6 @@
           <div class="stat-box"><div class="stat-num" id="es-ratio">4</div><div class="stat-name">ratio</div></div>
         </div>
       </div>
-
       <div class="card">
         <div class="card-label">DNA sequence</div>
         <div class="output-box" id="enc-out">sequence shows up here</div>
@@ -96,7 +145,6 @@
         <div class="card-label">Sequence to analyze</div>
         <textarea id="ana-in" placeholder="Paste a sequence..." rows="3"></textarea>
       </div>
-
       <div class="card" id="ana-body" style="display:none">
         <div class="stats-row">
           <div class="stat-box"><div class="stat-num" id="as-len"></div><div class="stat-name">length</div></div>
@@ -132,11 +180,104 @@
       </div>
     </div>
 
+    <!-- RADIATION -->
+    <div class="panel" id="panel-radiation">
+      <div class="card">
+        <div class="card-label">Text to encode and expose to radiation</div>
+        <textarea id="rad-in" placeholder="Type text to encode..." rows="3"></textarea>
+        <div class="rad-input-note" id="rad-input-note"></div>
+      </div>
+
+      <div class="card">
+        <div class="rad-label">Radiation environment</div>
+        <div class="env-grid" id="env-grid">
+          <button class="env-btn active" data-env="leo">
+            <span class="env-name">🛰 Low Earth Orbit</span>
+            <span class="env-desc">ISS altitude. Protected by Earth's magnetic field.</span>
+          </button>
+          <button class="env-btn" data-env="lunar">
+            <span class="env-name">🌕 Lunar Surface</span>
+            <span class="env-desc">No magnetic field. Direct solar particle exposure.</span>
+          </button>
+          <button class="env-btn" data-env="mars">
+            <span class="env-name">🔴 Mars Surface</span>
+            <span class="env-desc">Thin atmosphere. Significant cosmic ray flux.</span>
+          </button>
+          <button class="env-btn" data-env="deepspace">
+            <span class="env-name">🌌 Deep Space</span>
+            <span class="env-desc">Beyond Mars. Full galactic cosmic ray exposure.</span>
+          </button>
+          <button class="env-btn" data-env="europa">
+            <span class="env-name">🪐 Europa Orbit</span>
+            <span class="env-desc">Trapped in Jupiter's radiation belts. Extreme.</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="rad-label">Mission duration</div>
+        <div class="duration-wrap">
+          <div><span class="duration-display" id="dur-display">10</span><span class="duration-unit">years</span></div>
+          <input type="range" class="duration-slider" id="dur-slider" min="1" max="100" value="10" step="1">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#444">
+            <span>1 yr</span><span>25 yrs</span><span>50 yrs</span><span>75 yrs</span><span>100 yrs</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <button class="btn btn-danger" id="rad-run">Simulate radiation damage</button>
+      </div>
+
+      <!-- Results -->
+      <div id="rad-results" style="display:none">
+
+        <div id="rad-recovery-banner" class="recovery-banner ok"></div>
+
+        <div class="card">
+          <div class="card-label">Damage summary</div>
+          <div class="rad-summary">
+            <div class="rad-stat"><div class="num" id="rs-total"></div><div class="lbl">total bases</div></div>
+            <div class="rad-stat"><div class="num danger" id="rs-damaged"></div><div class="lbl">damaged</div></div>
+            <div class="rad-stat"><div class="num warn" id="rs-changes"></div><div class="lbl">base changes</div></div>
+            <div class="rad-stat"><div class="num danger" id="rs-breaks"></div><div class="lbl">unreadable</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Damaged sequence — <span style="color:#f87171">red = corrupted</span>, <span style="color:#ef4444;font-weight:700">X = unreadable (strand break)</span></div>
+          <div class="seq-wrap" id="rad-seq-out"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Base-by-base comparison</div>
+          <div id="rad-comparison" style="max-height:320px;overflow-y:auto"></div>
+        </div>
+
+      </div>
+    </div>
+
   </main>
 
   <script src="engine.js"></script>
+  <script src="radiation.js"></script>
   <script>
+    // ---------------------------------------------------------------------------
+    // Expose engine globals (fix for module/global mismatch)
+    // ---------------------------------------------------------------------------
+    if (typeof textToBytes === 'undefined' && typeof HelixEngine !== 'undefined') {
+      window.textToBytes    = HelixEngine.textToBytes;
+      window.bytesToText    = HelixEngine.bytesToText;
+      window.encodeBytes    = HelixEngine.encodeBytes;
+      window.decodeStrand   = HelixEngine.decodeStrand;
+      window.gcContent      = HelixEngine.gcContent;
+      window.analyzeStrand  = HelixEngine.analyzeStrand;
+      window.encode         = HelixEngine.encode;
+    }
+
+    // ---------------------------------------------------------------------------
     // Tab switching
+    // ---------------------------------------------------------------------------
     document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -144,19 +285,26 @@
       document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + t));
     }));
 
-    // Helper copy
     function copyTextFrom(element) {
       const txt = element.textContent || element.value || '';
       if (!txt) return;
       navigator.clipboard?.writeText(txt).catch(()=>{});
     }
 
+    // ---------------------------------------------------------------------------
     // ENCODE
+    // ---------------------------------------------------------------------------
     const encIn = document.getElementById('enc-in');
     const encOut = document.getElementById('enc-out');
     encIn.addEventListener('input', () => {
       const txt = encIn.value;
-      if (!txt) { encOut.textContent = 'sequence shows up here'; document.getElementById('enc-stats').style.display='none'; document.getElementById('enc-copy').style.display='none'; document.getElementById('enc-viz-btn').style.display='none'; return; }
+      if (!txt) {
+        encOut.textContent = 'sequence shows up here';
+        document.getElementById('enc-stats').style.display = 'none';
+        document.getElementById('enc-copy').style.display = 'none';
+        document.getElementById('enc-viz-btn').style.display = 'none';
+        return;
+      }
       try {
         const bytes = textToBytes(txt);
         const strand = encodeBytes(bytes);
@@ -165,77 +313,229 @@
         document.getElementById('es-bases').textContent = strand.length;
         const gc = gcContent(strand);
         const gcEl = document.getElementById('es-gc');
-        gcEl.textContent = (gc*100).toFixed(1) + '%';
-        gcEl.className = 'stat-num ' + (gc>=0.4 && gc<=0.6 ? 'good' : '');
+        gcEl.textContent = (gc * 100).toFixed(1) + '%';
+        gcEl.className = 'stat-num ' + (gc >= 0.4 && gc <= 0.6 ? 'good' : '');
         document.getElementById('enc-stats').style.display = 'grid';
         document.getElementById('enc-copy').style.display = '';
         document.getElementById('enc-viz-btn').style.display = '';
       } catch (e) {
-        encOut.innerHTML = '<span class="error">'+e.message+'</span>';
+        encOut.innerHTML = '<span class="error">' + e.message + '</span>';
       }
     });
-    document.getElementById('enc-copy').addEventListener('click', ()=>copyTextFrom(encOut));
+    document.getElementById('enc-copy').addEventListener('click', () => copyTextFrom(encOut));
 
     let vizOn = false;
-    document.getElementById('enc-viz-btn').addEventListener('click', ()=>{
+    document.getElementById('enc-viz-btn').addEventListener('click', () => {
       vizOn = !vizOn;
       const wrap = document.getElementById('enc-viz');
       const bases = document.getElementById('enc-bases');
       bases.innerHTML = '';
       if (vizOn) {
         const strand = encOut.textContent || '';
-        for (let i=0;i<Math.min(strand.length,280);i++){
-          const s = document.createElement('span'); s.className = 'base b-' + strand[i]; s.textContent = strand[i]; bases.appendChild(s);
+        for (let i = 0; i < Math.min(strand.length, 280); i++) {
+          const s = document.createElement('span');
+          s.className = 'base b-' + strand[i];
+          s.textContent = strand[i];
+          bases.appendChild(s);
         }
-        if (strand.length>280){ const m=document.createElement('span'); m.style.color='#777'; m.textContent = '+'+(strand.length-280)+' more'; bases.appendChild(m); }
-        wrap.style.display='block'; document.getElementById('enc-viz-btn').textContent='Hide colors';
-      } else { wrap.style.display='none'; document.getElementById('enc-viz-btn').textContent='Show colors'; }
+        if (strand.length > 280) {
+          const m = document.createElement('span');
+          m.style.color = '#777';
+          m.textContent = '+' + (strand.length - 280) + ' more';
+          bases.appendChild(m);
+        }
+        wrap.style.display = 'block';
+        document.getElementById('enc-viz-btn').textContent = 'Hide colors';
+      } else {
+        wrap.style.display = 'none';
+        document.getElementById('enc-viz-btn').textContent = 'Show colors';
+      }
     });
 
+    // ---------------------------------------------------------------------------
     // DECODE
+    // ---------------------------------------------------------------------------
     const decIn = document.getElementById('dec-in');
     const decOut = document.getElementById('dec-out');
-    decIn.addEventListener('input', ()=>{
-      const raw = decIn.value.replace(/\s/g,'').toUpperCase();
-      if (!raw) { decOut.textContent = 'decoded text shows up here'; document.getElementById('dec-copy').style.display='none'; return; }
-      try { decOut.textContent = bytesToText(decodeStrand(raw)); document.getElementById('dec-copy').style.display=''; }
-      catch(e){ decOut.innerHTML = '<span class="error">'+e.message+'</span>'; document.getElementById('dec-copy').style.display='none'; }
+    decIn.addEventListener('input', () => {
+      const raw = decIn.value.replace(/\s/g, '').toUpperCase();
+      if (!raw) { decOut.textContent = 'decoded text shows up here'; document.getElementById('dec-copy').style.display = 'none'; return; }
+      try {
+        decOut.textContent = bytesToText(decodeStrand(raw));
+        document.getElementById('dec-copy').style.display = '';
+      } catch (e) {
+        decOut.innerHTML = '<span class="error">' + e.message + '</span>';
+        document.getElementById('dec-copy').style.display = 'none';
+      }
     });
-    document.getElementById('dec-copy').addEventListener('click', ()=>copyTextFrom(decOut));
+    document.getElementById('dec-copy').addEventListener('click', () => copyTextFrom(decOut));
 
+    // ---------------------------------------------------------------------------
     // ANALYZE
+    // ---------------------------------------------------------------------------
     const anaIn = document.getElementById('ana-in');
-    anaIn.addEventListener('input', ()=>{
-      const raw = anaIn.value.replace(/\s/g,'').toUpperCase();
+    anaIn.addEventListener('input', () => {
+      const raw = anaIn.value.replace(/\s/g, '').toUpperCase();
       const body = document.getElementById('ana-body');
-      if (!raw || raw.length<4) { body.style.display='none'; return; }
+      if (!raw || raw.length < 4) { body.style.display = 'none'; return; }
       const stats = analyzeStrand(raw);
       document.getElementById('as-len').textContent = stats.length;
-      document.getElementById('as-gc').textContent = (stats.gcFraction*100).toFixed(1)+'%';
+      document.getElementById('as-gc').textContent = (stats.gcFraction * 100).toFixed(1) + '%';
       document.getElementById('as-hp').textContent = stats.hpRuns.length;
-      document.getElementById('as-tm').textContent = stats.tm!==null ? stats.tm.toFixed(1) : '';
+      document.getElementById('as-tm').textContent = stats.tm !== null ? stats.tm.toFixed(1) : '';
       document.getElementById('rc-out').textContent = stats.revComp;
       document.getElementById('bc-A').textContent = stats.baseCounts.A;
       document.getElementById('bc-C').textContent = stats.baseCounts.C;
       document.getElementById('bc-G').textContent = stats.baseCounts.G;
       document.getElementById('bc-T').textContent = stats.baseCounts.T;
-      body.style.display='block';
+      body.style.display = 'block';
     });
 
-    // TRACE (simple final sequence view)
+    // ---------------------------------------------------------------------------
+    // TRACE
+    // ---------------------------------------------------------------------------
     const trIn = document.getElementById('tr-in');
-    trIn.addEventListener('input', ()=>{
+    trIn.addEventListener('input', () => {
       const txt = trIn.value;
       const body = document.getElementById('tr-body');
-      if (!txt) { body.style.display='none'; return; }
+      if (!txt) { body.style.display = 'none'; return; }
       const strand = encode(txt);
-      const wrap = document.getElementById('tr-bases'); wrap.innerHTML='';
-      for (let i=0;i<strand.length;i++){ const s=document.createElement('span'); s.className='base b-'+strand[i]; s.textContent=strand[i]; wrap.appendChild(s); }
-      body.style.display='block';
+      const wrap = document.getElementById('tr-bases');
+      wrap.innerHTML = '';
+      for (let i = 0; i < strand.length; i++) {
+        const s = document.createElement('span');
+        s.className = 'base b-' + strand[i];
+        s.textContent = strand[i];
+        wrap.appendChild(s);
+      }
+      body.style.display = 'block';
     });
 
-    // Expose old globals if engine.js used different names
-    // (engine.js provides textToBytes, encodeBytes, decodeStrand, bytesToText, gcContent, analyzeStrand)
+    // ---------------------------------------------------------------------------
+    // RADIATION
+    // ---------------------------------------------------------------------------
+    let selectedEnv = 'leo';
+
+    // Environment selector
+    document.querySelectorAll('.env-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.env-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedEnv = btn.getAttribute('data-env');
+      });
+    });
+
+    // Duration slider
+    const durSlider = document.getElementById('dur-slider');
+    const durDisplay = document.getElementById('dur-display');
+    durSlider.addEventListener('input', () => {
+      durDisplay.textContent = durSlider.value;
+    });
+
+    // Input note
+    const radIn = document.getElementById('rad-in');
+    radIn.addEventListener('input', () => {
+      const strand = encode(radIn.value || '');
+      const note = document.getElementById('rad-input-note');
+      if (radIn.value) {
+        note.textContent = strand.length + ' bases will be simulated';
+      } else {
+        note.textContent = '';
+      }
+    });
+
+    // Run simulation
+    document.getElementById('rad-run').addEventListener('click', () => {
+      const txt = radIn.value.trim();
+      if (!txt) { alert('Please enter some text to encode first.'); return; }
+
+      const strand = encode(txt);
+      const years  = parseInt(durSlider.value);
+      const results = simulateRadiation(strand, selectedEnv, years);
+      const summary = summarizeDamage(results);
+
+      // Show results section
+      document.getElementById('rad-results').style.display = 'block';
+
+      // Summary stats
+      document.getElementById('rs-total').textContent   = summary.total;
+      document.getElementById('rs-damaged').textContent  = summary.damaged;
+      document.getElementById('rs-changes').textContent  = summary.baseChanges;
+      document.getElementById('rs-breaks').textContent   = summary.unreadable;
+
+      // Recovery banner
+      const banner = document.getElementById('rad-recovery-banner');
+      const pct = (summary.damageFraction * 100).toFixed(2);
+      if (summary.recoverable) {
+        banner.className = 'recovery-banner ok';
+        banner.innerHTML = `✓ <strong>Data likely recoverable.</strong> ${pct}% of bases damaged — within the threshold where error correction codes (like Reed-Solomon) could restore the original sequence.`;
+      } else {
+        banner.className = 'recovery-banner bad';
+        banner.innerHTML = `✗ <strong>Data integrity compromised.</strong> ${pct}% of bases damaged — beyond the ~5% threshold where standard error correction can recover the original sequence without significant redundancy.`;
+      }
+
+      // Damaged sequence with inline highlights
+      const seqOut = document.getElementById('rad-seq-out');
+      seqOut.innerHTML = '';
+      for (const r of results) {
+        const span = document.createElement('span');
+        if (r.damageType === 'none') {
+          span.className = 'seq-ok';
+          span.textContent = r.result;
+        } else if (r.damageType === 'base_change') {
+          span.className = 'seq-damaged';
+          span.textContent = r.result;
+          span.title = `Position ${r.index}: ${r.original} → ${r.result}`;
+        } else {
+          span.className = 'seq-unreadable';
+          span.textContent = 'X';
+          span.title = `Position ${r.index}: strand break`;
+        }
+        seqOut.appendChild(span);
+      }
+
+      // Comparison — only show changed bases to keep it readable
+      const compEl = document.getElementById('rad-comparison');
+      compEl.innerHTML = '';
+      const changed = results.filter(r => r.damageType !== 'none');
+
+      if (changed.length === 0) {
+        compEl.innerHTML = '<div style="color:#6ee7b7;font-size:13px;padding:8px 0">No damage detected — all bases intact.</div>';
+      } else {
+        // Group into quads (bytes) for context
+        for (const r of changed) {
+          const byteIndex = Math.floor(r.index / 4);
+          const posInByte = r.index % 4;
+          const row = document.createElement('div');
+          row.className = 'comparison-row';
+
+          const orig = document.createElement('span');
+          orig.className = 'comparison-original';
+          orig.textContent = `base ${r.index} (byte ${byteIndex}, pos ${posInByte})`;
+
+          const arrow = document.createElement('span');
+          arrow.className = 'comparison-arrow';
+          arrow.textContent = '→';
+
+          const res = document.createElement('span');
+          if (r.damageType === 'base_change') {
+            res.className = 'comparison-result changed';
+            res.textContent = `${r.original} → ${r.result}  (bit flip)`;
+          } else {
+            res.className = 'comparison-result unreadable';
+            res.textContent = `${r.original} → X  (strand break)`;
+          }
+
+          row.appendChild(orig);
+          row.appendChild(arrow);
+          row.appendChild(res);
+          compEl.appendChild(row);
+        }
+      }
+
+      // Scroll to results
+      document.getElementById('rad-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   </script>
 </body>
 </html>
