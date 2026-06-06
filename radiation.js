@@ -1,23 +1,3 @@
-// =============================================================================
-//  HelixArchive — Radiation Simulation Engine
-//  radiation.js
-//
-//  Models the effect of ionizing space radiation on a DNA storage strand.
-//
-//  Real radiation effects on DNA:
-//    - Base damage:   a base is chemically altered → treated as random substitution
-//    - Strand breaks: backbone snaps → treated as a run of unreadable bases ('X')
-//    - Cross-linking: bases bond incorrectly → treated as local substitution cluster
-//
-//  Radiation intensity is modeled on real cosmic ray / solar particle flux
-//  at different orbital distances, expressed as events per base per year.
-// =============================================================================
-
-
-// ---------------------------------------------------------------------------
-// Radiation environment presets
-// (approximate ionizing event rates, normalized for modeling purposes)
-// ---------------------------------------------------------------------------
 
 const ENVIRONMENTS = {
   leo: {
