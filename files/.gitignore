@@ -1,5 +1,0 @@
-/target
-*.strand
-*.fasta
-config.json
-Cargo.lock

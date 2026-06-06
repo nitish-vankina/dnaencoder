@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNA Encoder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background:#0d0d0d; color:#f0f0f0; font-family:'Space Grotesk',sans-serif; min-height:100vh; }
+    nav{ padding:18px 24px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #1e1e1e }
+    .logo{ font-weight:700; color:#fff }
+    main{ max-width:900px; margin:24px auto; padding:20px }
+    h1{ font-size:28px; margin-bottom:6px; background:linear-gradient(135deg,#fff 40%,#7c3aed); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent }
+    .subtitle{ color:#777; margin-bottom:18px }
+    .tabs{ display:flex; gap:8px; margin-bottom:16px }
+    .tab{ padding:8px 14px; border-radius:999px; border:1px solid #2a2a2a; background:transparent; color:#aaa; cursor:pointer }
+    .tab.active{ background:#7c3aed; border-color:#7c3aed; color:#fff }
+    .panel{ display:none }
+    .panel.active{ display:block }
+    .card{ background:#111; border:1px solid #1e1e1e; border-radius:12px; padding:16px; margin-bottom:12px }
+    textarea,input[type=text]{ width:100%; background:#0d0d0d; border:1px solid #222; border-radius:8px; padding:12px; color:#f0f0f0; resize:vertical }
+    .output-box{ background:#0d0d0d; border:1px solid #222; border-radius:8px; padding:12px; font-family:monospace; color:#c0c0c0; min-height:56px; word-break:break-all }
+    .btn{ padding:8px 14px; border-radius:999px; border:1px solid #2a2a2a; background:transparent; color:#aaa; cursor:pointer }
+    .btn.btn-primary{ background:#7c3aed; color:#fff; border-color:#7c3aed }
+    .bases-wrap{ display:flex; flex-wrap:wrap; gap:4px; margin-top:8px }
+    .base{ width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; font-size:11px; border-radius:4px }
+    .b-A{ background:rgba(124,58,237,0.12); color:#a78bfa }
+    .b-C{ background:rgba(59,130,246,0.08); color:#93c5fd }
+    .b-G{ background:rgba(16,185,129,0.08); color:#6ee7b7 }
+    .b-T{ background:rgba(244,63,94,0.08); color:#fda4af }
+    .stats-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px }
+    .stat-box{ background:#111; border:1px solid #1e1e1e; border-radius:8px; padding:10px; text-align:center }
+    .stat-num{ font-weight:700; font-size:16px }
+    .stat-name{ font-size:11px; color:#666 }
+    .error{ color:#f87171 }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">dnatools <span style="margin-left:8px;font-size:11px;background:#7c3aed;padding:2px 8px;border-radius:999px;color:#fff">beta</span></div>
+    <div class="nav-right" style="color:#666;font-size:13px">made with ❤️</div>
+  </nav>
+  <main>
+    <h1>Encode text as DNA</h1>
+    <p class="subtitle">Convert any text into a real DNA sequence using 2-bit encoding</p>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="encode">encode</button>
+      <button class="tab" data-tab="decode">decode</button>
+      <button class="tab" data-tab="analyze">analyze</button>
+      <button class="tab" data-tab="trace">trace</button>
+    </div>
+
+    <!-- ENCODE -->
+    <div class="panel active" id="panel-encode">
+      <div class="card">
+        <div class="card-label">Your text</div>
+        <textarea id="enc-in" placeholder="Type text to encode..." rows="4"></textarea>
+        <div class="stats-row" id="enc-stats" style="display:none">
+          <div class="stat-box"><div class="stat-num" id="es-bytes"></div><div class="stat-name">bytes</div></div>
+          <div class="stat-box"><div class="stat-num" id="es-bases"></div><div class="stat-name">bases</div></div>
+          <div class="stat-box"><div class="stat-num" id="es-gc"></div><div class="stat-name">GC %</div></div>
+          <div class="stat-box"><div class="stat-num" id="es-ratio">4</div><div class="stat-name">ratio</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">DNA sequence</div>
+        <div class="output-box" id="enc-out">sequence shows up here</div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn btn-primary" id="enc-copy" style="display:none">Copy sequence</button>
+          <button class="btn" id="enc-viz-btn" style="display:none">Show colors</button>
+        </div>
+        <div id="enc-viz" style="display:none;margin-top:10px"><div class="bases-wrap" id="enc-bases"></div></div>
+      </div>
+    </div>
+
+    <!-- DECODE -->
+    <div class="panel" id="panel-decode">
+      <div class="card">
+        <div class="card-label">Paste sequence</div>
+        <textarea id="dec-in" placeholder="Paste your A/C/G/T sequence here..." rows="4"></textarea>
+      </div>
+      <div class="card">
+        <div class="card-label">Decoded text</div>
+        <div class="output-box" id="dec-out">decoded text shows up here</div>
+        <div style="margin-top:10px"><button class="btn btn-primary" id="dec-copy" style="display:none">Copy text</button></div>
+      </div>
+    </div>
+
+    <!-- ANALYZE -->
+    <div class="panel" id="panel-analyze">
+      <div class="card">
+        <div class="card-label">Sequence to analyze</div>
+        <textarea id="ana-in" placeholder="Paste a sequence..." rows="3"></textarea>
+      </div>
+
+      <div class="card" id="ana-body" style="display:none">
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-num" id="as-len"></div><div class="stat-name">length</div></div>
+          <div class="stat-box"><div class="stat-num" id="as-gc"></div><div class="stat-name">GC %</div></div>
+          <div class="stat-box"><div class="stat-num" id="as-hp"></div><div class="stat-name">HP runs</div></div>
+          <div class="stat-box"><div class="stat-num" id="as-tm"></div><div class="stat-name">Tm °C</div></div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="card-label">Reverse complement</div>
+          <div class="output-box" id="rc-out"></div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="card-label">Base counts</div>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <div class="stat-box"><div class="stat-num" id="bc-A" style="color:#a78bfa"></div><div class="stat-name">A</div></div>
+            <div class="stat-box"><div class="stat-num" id="bc-C" style="color:#93c5fd"></div><div class="stat-name">C</div></div>
+            <div class="stat-box"><div class="stat-num" id="bc-G" style="color:#6ee7b7"></div><div class="stat-name">G</div></div>
+            <div class="stat-box"><div class="stat-num" id="bc-T" style="color:#fda4af"></div><div class="stat-name">T</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRACE -->
+    <div class="panel" id="panel-trace">
+      <div class="card">
+        <div class="card-label">Type something short (max 6 chars)</div>
+        <input type="text" id="tr-in" maxlength="6" placeholder="e.g. Hi" />
+      </div>
+      <div class="card" id="tr-body" style="display:none">
+        <div class="card-label">Final sequence</div>
+        <div class="bases-wrap" id="tr-bases"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="engine.js"></script>
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const t = btn.getAttribute('data-tab');
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + t));
+    }));
+
+    // Helper copy
+    function copyTextFrom(element) {
+      const txt = element.textContent || element.value || '';
+      if (!txt) return;
+      navigator.clipboard?.writeText(txt).catch(()=>{});
+    }
+
+    // ENCODE
+    const encIn = document.getElementById('enc-in');
+    const encOut = document.getElementById('enc-out');
+    encIn.addEventListener('input', () => {
+      const txt = encIn.value;
+      if (!txt) { encOut.textContent = 'sequence shows up here'; document.getElementById('enc-stats').style.display='none'; document.getElementById('enc-copy').style.display='none'; document.getElementById('enc-viz-btn').style.display='none'; return; }
+      try {
+        const bytes = textToBytes(txt);
+        const strand = encodeBytes(bytes);
+        encOut.textContent = strand;
+        document.getElementById('es-bytes').textContent = bytes.length;
+        document.getElementById('es-bases').textContent = strand.length;
+        const gc = gcContent(strand);
+        const gcEl = document.getElementById('es-gc');
+        gcEl.textContent = (gc*100).toFixed(1) + '%';
+        gcEl.className = 'stat-num ' + (gc>=0.4 && gc<=0.6 ? 'good' : '');
+        document.getElementById('enc-stats').style.display = 'grid';
+        document.getElementById('enc-copy').style.display = '';
+        document.getElementById('enc-viz-btn').style.display = '';
+      } catch (e) {
+        encOut.innerHTML = '<span class="error">'+e.message+'</span>';
+      }
+    });
+    document.getElementById('enc-copy').addEventListener('click', ()=>copyTextFrom(encOut));
+
+    let vizOn = false;
+    document.getElementById('enc-viz-btn').addEventListener('click', ()=>{
+      vizOn = !vizOn;
+      const wrap = document.getElementById('enc-viz');
+      const bases = document.getElementById('enc-bases');
+      bases.innerHTML = '';
+      if (vizOn) {
+        const strand = encOut.textContent || '';
+        for (let i=0;i<Math.min(strand.length,280);i++){
+          const s = document.createElement('span'); s.className = 'base b-' + strand[i]; s.textContent = strand[i]; bases.appendChild(s);
+        }
+        if (strand.length>280){ const m=document.createElement('span'); m.style.color='#777'; m.textContent = '+'+(strand.length-280)+' more'; bases.appendChild(m); }
+        wrap.style.display='block'; document.getElementById('enc-viz-btn').textContent='Hide colors';
+      } else { wrap.style.display='none'; document.getElementById('enc-viz-btn').textContent='Show colors'; }
+    });
+
+    // DECODE
+    const decIn = document.getElementById('dec-in');
+    const decOut = document.getElementById('dec-out');
+    decIn.addEventListener('input', ()=>{
+      const raw = decIn.value.replace(/\s/g,'').toUpperCase();
+      if (!raw) { decOut.textContent = 'decoded text shows up here'; document.getElementById('dec-copy').style.display='none'; return; }
+      try { decOut.textContent = bytesToText(decodeStrand(raw)); document.getElementById('dec-copy').style.display=''; }
+      catch(e){ decOut.innerHTML = '<span class="error">'+e.message+'</span>'; document.getElementById('dec-copy').style.display='none'; }
+    });
+    document.getElementById('dec-copy').addEventListener('click', ()=>copyTextFrom(decOut));
+
+    // ANALYZE
+    const anaIn = document.getElementById('ana-in');
+    anaIn.addEventListener('input', ()=>{
+      const raw = anaIn.value.replace(/\s/g,'').toUpperCase();
+      const body = document.getElementById('ana-body');
+      if (!raw || raw.length<4) { body.style.display='none'; return; }
+      const stats = analyzeStrand(raw);
+      document.getElementById('as-len').textContent = stats.length;
+      document.getElementById('as-gc').textContent = (stats.gcFraction*100).toFixed(1)+'%';
+      document.getElementById('as-hp').textContent = stats.hpRuns.length;
+      document.getElementById('as-tm').textContent = stats.tm!==null ? stats.tm.toFixed(1) : '';
+      document.getElementById('rc-out').textContent = stats.revComp;
+      document.getElementById('bc-A').textContent = stats.baseCounts.A;
+      document.getElementById('bc-C').textContent = stats.baseCounts.C;
+      document.getElementById('bc-G').textContent = stats.baseCounts.G;
+      document.getElementById('bc-T').textContent = stats.baseCounts.T;
+      body.style.display='block';
+    });
+
+    // TRACE (simple final sequence view)
+    const trIn = document.getElementById('tr-in');
+    trIn.addEventListener('input', ()=>{
+      const txt = trIn.value;
+      const body = document.getElementById('tr-body');
+      if (!txt) { body.style.display='none'; return; }
+      const strand = encode(txt);
+      const wrap = document.getElementById('tr-bases'); wrap.innerHTML='';
+      for (let i=0;i<strand.length;i++){ const s=document.createElement('span'); s.className='base b-'+strand[i]; s.textContent=strand[i]; wrap.appendChild(s); }
+      body.style.display='block';
+    });
+
+    // Expose old globals if engine.js used different names
+    // (engine.js provides textToBytes, encodeBytes, decodeStrand, bytesToText, gcContent, analyzeStrand)
+  </script>
+</body>
+</html>
