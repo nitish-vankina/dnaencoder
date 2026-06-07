@@ -1,717 +1,970 @@
-          <div class="char-steps" id="ex-steps"></div>
-        </div>
-      </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>dnatools</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-      <hr class="explain-divider">
-
-      <!-- Section 3: GC content -->
-      <div class="explain-section">
-        <div class="explain-h">Part 2</div>
-        <div class="explain-title">What is GC content and why does it matter?</div>
-        <div class="explain-body">
-          In DNA, bases always pair up across the two strands: <strong style="color:#a78bfa">A</strong> pairs with <strong style="color:#fda4af">T</strong>, and <strong style="color:#93c5fd">C</strong> pairs with <strong style="color:#6ee7b7">G</strong>.<br><br>
-          A–T pairs are held together by <strong>2 hydrogen bonds</strong>.<br>
-          C–G pairs are held together by <strong>3 hydrogen bonds</strong>.<br><br>
-          More bonds = stronger = harder to pull apart. A strand that's mostly G and C is very stable. A strand that's mostly A and T is weak and tends to fall apart.<br><br>
-          The ideal range for DNA synthesis is <strong style="color:#6ee7b7">40–60% GC</strong>. Too low and the strand is fragile. Too high and it becomes rigid and difficult to work with chemically.
-        </div>
-
-        <div class="gc-meter-wrap">
-          <div style="font-size:12px;color:#555;margin-bottom:8px">Move the slider to see what different GC% means</div>
-          <input type="range" id="ex-gc-slider" min="0" max="100" value="50" style="width:100%;accent-color:#f59e0b;margin-bottom:10px;display:block">
-          <div class="gc-track">
-            <div class="gc-zone"></div>
-            <div class="gc-fill" id="ex-gc-fill" style="width:50%"></div>
-          </div>
-          <div class="gc-labels"><span>0%</span><span>40% ←ideal→ 60%</span><span>100%</span></div>
-          <div style="margin-top:12px;font-size:13px;min-height:20px" id="ex-gc-verdict"></div>
-        </div>
-      </div>
-
-      <hr class="explain-divider">
-
-      <!-- Section 4: The big picture -->
-      <div class="explain-section">
-        <div class="explain-h">Part 3</div>
-        <div class="explain-title">Why does DNA storage matter?</div>
-        <div class="explain-body">
-          The world generates an enormous amount of data — and we're running out of good ways to store it long term. Hard drives fail after a few years. Magnetic tape lasts maybe 30. Flash memory is measured in years, not decades.
-        </div>
-
-        <div class="fact-row">
-          <div class="fact-box">
-            <div class="fact-num">215 PB</div>
-            <div class="fact-desc">Theoretical data density of 1 gram of DNA</div>
-          </div>
-          <div class="fact-box">
-            <div class="fact-num">700K yrs</div>
-            <div class="fact-desc">Age of oldest successfully read DNA (horse fossil)</div>
-          </div>
-          <div class="fact-box">
-            <div class="fact-num">~5 yrs</div>
-            <div class="fact-desc">Average lifespan of a consumer hard drive</div>
-          </div>
-        </div>
-
-        <div class="explain-body">
-          Researchers at Microsoft, Harvard's Wyss Institute, and the European Bioinformatics Institute have all demonstrated working DNA storage systems. The encoding layer — exactly what this tool implements — is the solved part. The hard parts are synthesis speed and cost.<br><br>
-          <strong>The space angle:</strong> on long-duration missions like a Mars trip or a Europa orbiter, data needs to survive for years without maintenance. Traditional storage degrades, especially under radiation. DNA in a protective medium could outlast any electronic storage we have — if we can protect it from the radiation that tries to corrupt it, which is exactly what the radiation tab models.
-        </div>
-      </div>
-
-      <hr class="explain-divider">
-
-      <!-- Section 5: Radiation and DNA -->
-      <div class="explain-section" style="margin-bottom:8px">
-        <div class="explain-h">Part 4</div>
-        <div class="explain-title">How radiation corrupts DNA data</div>
-        <div class="explain-body">
-          Ionizing radiation — the kind you get in space — carries enough energy to physically damage molecules. When it hits a DNA strand, a few things can happen:<br><br>
-          <strong>Base damage:</strong> a high-energy particle knocks electrons out of a nucleotide, chemically altering it. An A might become something that reads as C. This is a bit flip at the molecular level — exactly like what happens to computer memory in space, except it's chemistry instead of electronics.<br><br>
-          <strong>Strand break:</strong> the particle hits the backbone of the DNA helix and snaps it. A section of the strand becomes unreadable. In the simulation, these show as <strong style="color:#ef4444">X</strong>.<br><br>
-          The reason Europa is so extreme is that Jupiter has a massive magnetic field that traps charged particles in radiation belts around the planet. Europa orbits inside those belts. The radiation dose there is roughly <strong>540 Sv per day</strong> — enough to kill a human in seconds and destroy unprotected electronics quickly. DNA storage there would need heavy error correction and redundancy just to survive.
-        </div>
-      </div>
-
-    </div>
-
-    <!-- OPTIMIZE -->
-    <div class="panel" id="panel-optimize">
-      <div class="card">
-        <div class="card-label">Text to optimize</div>
-        <textarea id="opt-in" placeholder="Type text to encode with GC optimization..." rows="4"></textarea>
-      </div>
-
-      <div id="opt-results" style="display:none">
-        <div class="card">
-          <div class="card-label">Optimization result</div>
-          <div class="stats-row" style="margin-top:0;margin-bottom:12px">
-            <div class="stat-box"><div class="stat-num" id="opt-gc-before"></div><div class="stat-name">GC before</div></div>
-            <div class="stat-box"><div class="stat-num" id="opt-gc-after"></div><div class="stat-name">GC after</div></div>
-            <div class="stat-box"><div class="stat-num" id="opt-mask"></div><div class="stat-name">XOR mask</div></div>
-            <div class="stat-box"><div class="stat-num" id="opt-inrange"></div><div class="stat-name">in range</div></div>
-          </div>
-          <div id="opt-banner" style="border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px"></div>
-          <div class="card-label">Optimized strand</div>
-          <div class="output-box" id="opt-strand" style="margin-bottom:10px"></div>
-          <button class="btn btn-primary" id="opt-copy">Copy strand</button>
-        </div>
-
-        <div class="card">
-          <div class="card-label">Verify round-trip</div>
-          <div class="output-box" id="opt-decoded" style="color:#6ee7b7"></div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:4px">
-        <div class="card-label" style="margin-bottom:6px">How it works</div>
-        <div style="font-size:13px;color:#666;line-height:1.7">
-          Each byte is XOR'd with a mask value before encoding. Since XOR is its own inverse, applying the same mask again recovers the original. The optimizer tries all 256 possible mask values and picks whichever brings GC content closest to 50%. The mask is stored as the first 4 bases of the strand so the decoder knows how to reverse it.
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <script src="engine.js"></script>
-  <script src="radiation.js"></script>
-  <script src="rs.js"></script>
-  <script src="explain.js"></script>
-  <script src="gc-optimizer.js"></script>
-  <script>
-    // ---------------------------------------------------------------------------
-    // Engine global aliases
-    // ---------------------------------------------------------------------------
-    if (typeof textToBytes === 'undefined' && typeof HelixEngine !== 'undefined') {
-      window.textToBytes    = HelixEngine.textToBytes;
-      window.bytesToText    = HelixEngine.bytesToText;
-      window.encodeBytes    = HelixEngine.encodeBytes;
-      window.decodeStrand   = HelixEngine.decodeStrand;
-      window.gcContent      = HelixEngine.gcContent;
-      window.analyzeStrand  = HelixEngine.analyzeStrand;
-      window.encode         = HelixEngine.encode;
+    :root {
+      --bg: #fff;
+      --fg: #111;
+      --muted: #999;
+      --border: #e0e0e0;
+      --A: #7c3aed;
+      --C: #2563eb;
+      --G: #059669;
+      --T: #dc2626;
+      --mono: 'IBM Plex Mono', monospace;
     }
 
-    // ---------------------------------------------------------------------------
-    // Tab switching
-    // ---------------------------------------------------------------------------
-    document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const t = btn.getAttribute('data-tab');
-      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + t));
-    }));
-
-    function copyTextFrom(el) {
-      const txt = el.textContent || el.value || '';
-      if (txt) navigator.clipboard?.writeText(txt).catch(() => {});
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.6;
     }
 
-    // ---------------------------------------------------------------------------
-    // ENCODE
-    // ---------------------------------------------------------------------------
-    const encIn = document.getElementById('enc-in');
+    header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+    }
+
+    .logo { font-weight: 500; font-size: 14px; }
+    .logo-sub { color: var(--muted); font-size: 12px; }
+
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+    }
+
+    nav::-webkit-scrollbar { display: none; }
+
+    .tab {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 10px 14px 9px;
+      transition: color .12s, border-color .12s;
+      white-space: nowrap;
+    }
+
+    .tab:hover { color: var(--fg); }
+    .tab.active { color: var(--fg); border-bottom-color: var(--fg); }
+
+    main {
+      max-width: 680px;
+      padding: 32px 24px 80px;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 6px;
+    }
+
+    textarea, input[type="text"] {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--fg);
+      font-family: var(--mono);
+      font-size: 13px;
+      outline: none;
+      padding: 10px;
+      resize: vertical;
+      width: 100%;
+    }
+
+    textarea:focus, input[type="text"]:focus { border-color: #aaa; }
+    textarea::placeholder, input[type="text"]::placeholder { color: #ccc; }
+
+    .out {
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.8;
+      min-height: 42px;
+      padding: 10px;
+      word-break: break-all;
+    }
+
+    .out.scroll { max-height: 140px; overflow-y: auto; }
+
+    .row { margin-bottom: 18px; }
+
+    .hint { color: var(--muted); font-size: 11px; margin-top: 5px; }
+
+    button {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 11px;
+      margin-top: 8px;
+      padding: 5px 12px;
+      transition: border-color .12s, color .12s;
+    }
+
+    button:hover { border-color: #aaa; color: var(--fg); }
+
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+    /* stats */
+    .stats { display: flex; gap: 20px; flex-wrap: wrap; margin: 14px 0; }
+    .stat-label { color: var(--muted); font-size: 11px; }
+    .stat-val { font-size: 18px; font-weight: 500; }
+    .good { color: var(--G); }
+    .warn { color: #d97706; }
+    .bad  { color: var(--T); }
+
+    /* base colors */
+    .bA { color: var(--A); }
+    .bC { color: var(--C); }
+    .bG { color: var(--G); }
+    .bT { color: var(--T); }
+
+    /* viz */
+    #enc-viz {
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-size: 12px;
+      letter-spacing: .04em;
+      line-height: 1.9;
+      margin-top: 8px;
+      max-height: 120px;
+      overflow-y: auto;
+      padding: 10px;
+      word-break: break-all;
+      display: none;
+    }
+
+    /* notice */
+    .notice {
+      border-radius: 2px;
+      font-size: 12px;
+      margin: 10px 0;
+      padding: 8px 12px;
+    }
+    .notice.ok  { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+    .notice.bad { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+    .notice.info { background: #f8fafc; border: 1px solid var(--border); color: var(--muted); }
+
+    /* env buttons */
+    .env-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 6px;
+      margin: 8px 0 16px;
+    }
+
+    .env-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 11px;
+      margin: 0;
+      padding: 8px;
+      text-align: left;
+      transition: all .12s;
+    }
+
+    .env-btn:hover { border-color: #aaa; color: var(--fg); }
+
+    .env-btn.active {
+      border-color: var(--fg);
+      color: var(--fg);
+    }
+
+    .env-name { display: block; font-weight: 500; margin-bottom: 2px; }
+    .env-sub  { color: var(--muted); font-size: 10px; line-height: 1.3; }
+    .env-btn.active .env-sub { color: #999; }
+
+    /* slider */
+    .sl-row { display: flex; align-items: center; gap: 10px; margin: 6px 0 14px; }
+    .sl-row input[type="range"] { flex: 1; accent-color: var(--fg); cursor: pointer; }
+    .sl-val { font-size: 13px; min-width: 50px; text-align: right; }
+
+    /* seq */
+    .seq {
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-size: 11px;
+      letter-spacing: .04em;
+      line-height: 1.9;
+      max-height: 120px;
+      overflow-y: auto;
+      padding: 10px;
+      word-break: break-all;
+    }
+
+    .seq-ok { color: #ccc; }
+    .seq-mut { color: #d97706; }
+    .seq-brk { color: var(--T); }
+
+    /* recover banner */
+    .rec-banner { border-radius: 2px; font-size: 12px; margin: 14px 0; padding: 10px 12px; }
+    .rec-banner.ok  { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .rec-banner.bad { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+    /* damage log */
+    .dmg-row {
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      display: flex;
+      font-size: 12px;
+      gap: 10px;
+      padding: 4px 0;
+    }
+    .dmg-row:last-child { border: none; }
+    .dmg-pos { min-width: 170px; }
+    .dmg-val.mut { color: #d97706; }
+    .dmg-val.brk { color: var(--T); }
+
+    /* rs card */
+    .rs-card { border: 1px solid var(--border); border-radius: 2px; margin-top: 16px; padding: 14px; display: none; }
+
+    .rs-ok  { color: var(--G); }
+    .rs-rep { color: var(--G); }
+    .rs-los { color: var(--T); }
+    .rs-neu { color: #ccc; }
+
+    .rs-out {
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-size: 11px;
+      letter-spacing: .04em;
+      line-height: 1.9;
+      margin-top: 8px;
+      max-height: 100px;
+      overflow-y: auto;
+      padding: 10px;
+      word-break: break-all;
+    }
+
+    .rs-text {
+      font-size: 13px;
+      margin-top: 8px;
+      padding: 8px;
+      background: #f9f9f9;
+      border-radius: 2px;
+    }
+
+    /* explain */
+    .ex-part { margin-bottom: 32px; }
+    .ex-kicker { color: var(--muted); font-size: 11px; margin-bottom: 6px; }
+    .ex-title { font-size: 15px; font-weight: 500; margin-bottom: 10px; }
+    .ex-body { color: #444; font-size: 12px; line-height: 1.8; }
+    .ex-body strong { color: var(--fg); }
+
+    /* char breakdown */
+    .char-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .char-key { color: var(--muted); font-size: 11px; min-width: 72px; }
+
+    .diad { border-radius: 2px; display: inline-block; font-size: 12px; margin-right: 3px; padding: 1px 5px; }
+    .b-chip { border-radius: 2px; display: inline-block; font-size: 13px; font-weight: 500; margin-right: 4px; padding: 1px 7px; }
+
+    /* gc meter */
+    .gc-wrap { border: 1px solid var(--border); border-radius: 2px; margin: 14px 0; padding: 14px; }
+    .gc-track { background: #f5f5f5; border-radius: 2px; height: 8px; position: relative; overflow: hidden; margin: 8px 0 4px; }
+    .gc-zone  { background: rgba(5,150,105,.1); border-left: 1px solid rgba(5,150,105,.3); border-right: 1px solid rgba(5,150,105,.3); bottom:0; left:40%; position:absolute; top:0; width:20%; }
+    .gc-fill  { background: #111; bottom:0; left:0; position:absolute; top:0; transition:width .1s; }
+    .gc-labels { color: var(--muted); display: flex; font-size: 10px; justify-content: space-between; }
+
+    /* facts */
+    .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0; }
+    .fact { border: 1px solid var(--border); border-radius: 2px; padding: 12px; text-align: center; }
+    .fact-n { font-size: 17px; font-weight: 500; }
+    .fact-d { color: var(--muted); font-size: 10px; line-height: 1.4; margin-top: 3px; }
+
+    /* ana grid */
+    .ana-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+    .ana-cell { border: 1px solid var(--border); border-radius: 2px; padding: 10px; }
+    .ana-k { color: var(--muted); font-size: 10px; margin-bottom: 3px; }
+    .ana-v { font-size: 15px; font-weight: 500; }
+
+    .bc-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .bc { border: 1px solid var(--border); border-radius: 2px; flex: 1; padding: 8px; text-align: center; }
+    .bc-base { font-size: 15px; font-weight: 500; }
+    .bc-n { color: var(--muted); font-size: 11px; }
+
+    /* flux */
+    .flux { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); margin-bottom: 18px; }
+    .flux-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+    .flux-dot.live { background: var(--G); }
+    .flux-dot.err  { background: #d97706; }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    @media (max-width: 560px) {
+      main { padding: 20px 16px 60px; }
+      nav  { padding: 0 16px; }
+      header { padding: 16px; }
+      .facts { grid-template-columns: 1fr; }
+      .ana-grid { grid-template-columns: 1fr; }
+      .env-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="logo">dnatools</span>
+  <span class="logo-sub">// text → DNA sequence</span>
+</header>
+
+<nav>
+  <button class="tab active" data-tab="encode">encode</button>
+  <button class="tab" data-tab="decode">decode</button>
+  <button class="tab" data-tab="analyze">analyze</button>
+  <button class="tab" data-tab="trace">trace</button>
+  <button class="tab" data-tab="radiation">radiation</button>
+  <button class="tab" data-tab="optimize">gc optimizer</button>
+  <button class="tab" data-tab="explain">how it works</button>
+</nav>
+
+<main>
+
+  <!-- ENCODE -->
+  <div class="panel active" id="panel-encode">
+    <div class="row">
+      <label>text</label>
+      <textarea id="enc-in" rows="4" placeholder="type anything…"></textarea>
+    </div>
+    <div id="enc-stats" style="display:none">
+      <div class="stats">
+        <div><div class="stat-label">bytes</div><div class="stat-val" id="es-bytes"></div></div>
+        <div><div class="stat-label">bases</div><div class="stat-val" id="es-bases"></div></div>
+        <div><div class="stat-label">GC %</div><div class="stat-val" id="es-gc"></div></div>
+      </div>
+    </div>
+    <div class="row">
+      <label>DNA strand</label>
+      <div class="out scroll" id="enc-out"><span style="color:#ccc">sequence appears here</span></div>
+      <div class="btn-row" id="enc-actions" style="display:none">
+        <button id="enc-copy">copy</button>
+        <button id="enc-viz-btn">show colors</button>
+      </div>
+    </div>
+    <div id="enc-viz"></div>
+  </div>
+
+  <!-- DECODE -->
+  <div class="panel" id="panel-decode">
+    <div class="row">
+      <label>DNA strand</label>
+      <textarea id="dec-in" rows="4" placeholder="CAGACGAC…"></textarea>
+    </div>
+    <div class="row">
+      <label>decoded text</label>
+      <div class="out" id="dec-out"><span style="color:#ccc">result appears here</span></div>
+      <div id="dec-actions" style="display:none"><button id="dec-copy">copy</button></div>
+    </div>
+  </div>
+
+  <!-- ANALYZE -->
+  <div class="panel" id="panel-analyze">
+    <div class="row">
+      <label>DNA strand</label>
+      <textarea id="ana-in" rows="4" placeholder="paste a strand…"></textarea>
+    </div>
+    <div id="ana-body" style="display:none">
+      <div class="ana-grid">
+        <div class="ana-cell"><div class="ana-k">length</div><div class="ana-v" id="as-len"></div></div>
+        <div class="ana-cell"><div class="ana-k">GC content</div><div class="ana-v" id="as-gc"></div></div>
+        <div class="ana-cell"><div class="ana-k">melting temp</div><div class="ana-v" id="as-tm"></div></div>
+        <div class="ana-cell"><div class="ana-k">homopolymer runs</div><div class="ana-v" id="as-hp"></div></div>
+      </div>
+      <div class="row">
+        <label>base counts</label>
+        <div class="bc-row">
+          <div class="bc"><div class="bc-base bA">A</div><div class="bc-n" id="bc-A">0</div></div>
+          <div class="bc"><div class="bc-base bC">C</div><div class="bc-n" id="bc-C">0</div></div>
+          <div class="bc"><div class="bc-base bG">G</div><div class="bc-n" id="bc-G">0</div></div>
+          <div class="bc"><div class="bc-base bT">T</div><div class="bc-n" id="bc-T">0</div></div>
+        </div>
+      </div>
+      <div class="row">
+        <label>reverse complement</label>
+        <div class="out scroll" id="rc-out"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRACE -->
+  <div class="panel" id="panel-trace">
+    <div class="row">
+      <label>text</label>
+      <textarea id="tr-in" rows="3" placeholder="type something short…"></textarea>
+    </div>
+    <div id="tr-body" style="display:none">
+      <label>color-coded bases (4 per character)</label>
+      <div class="out scroll" id="tr-bases" style="letter-spacing:.04em"></div>
+    </div>
+  </div>
+
+  <!-- RADIATION -->
+  <div class="panel" id="panel-radiation">
+
+    <div class="flux" id="flux-banner">
+      <div class="flux-dot" id="flux-dot"></div>
+      <span id="flux-text">loading…</span>
+    </div>
+
+    <div class="row">
+      <label>text to encode</label>
+      <textarea id="rad-in" rows="3" placeholder="the data you want to send into space…"></textarea>
+      <div class="hint" id="rad-input-note"></div>
+    </div>
+
+    <div class="row">
+      <label>environment</label>
+      <div class="env-grid">
+        <button class="env-btn active" data-env="leo">
+          <span class="env-name">LEO / ISS</span>
+          <span class="env-sub">Earth's mag. field</span>
+        </button>
+        <button class="env-btn" data-env="lunar">
+          <span class="env-name">Lunar surface</span>
+          <span class="env-sub">no mag. field</span>
+        </button>
+        <button class="env-btn" data-env="mars">
+          <span class="env-name">Mars surface</span>
+          <span class="env-sub">thin atmosphere</span>
+        </button>
+        <button class="env-btn" data-env="deepspace">
+          <span class="env-name">Deep space</span>
+          <span class="env-sub">full GCR exposure</span>
+        </button>
+        <button class="env-btn" data-env="europa">
+          <span class="env-name">Europa orbit</span>
+          <span class="env-sub">Jupiter's rad. belts</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="row">
+      <label>mission duration</label>
+      <div class="sl-row">
+        <input type="range" id="dur-slider" min="1" max="50" value="5">
+        <span class="sl-val"><span id="dur-display">5</span> yr</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <label>Reed-Solomon parity bytes</label>
+      <div class="sl-row">
+        <input type="range" id="rs-parity-slider" min="0" max="32" value="8">
+        <span class="sl-val" id="rs-parity-display">8</span>
+      </div>
+      <div class="hint" id="rs-mode-chip"></div>
+    </div>
+
+    <button id="rad-run">run simulation</button>
+
+    <div id="rad-results" style="display:none">
+      <hr>
+      <div class="stats">
+        <div><div class="stat-label">total bases</div><div class="stat-val" id="rs-total"></div></div>
+        <div><div class="stat-label">damaged</div><div class="stat-val bad" id="rs-damaged"></div></div>
+        <div><div class="stat-label">substitutions</div><div class="stat-val warn" id="rs-changes"></div></div>
+        <div><div class="stat-label">strand breaks</div><div class="stat-val bad" id="rs-breaks"></div></div>
+      </div>
+      <div class="rec-banner" id="rad-recovery-banner"></div>
+      <div class="row">
+        <label>damaged strand — <span style="color:#d97706">yellow</span> = mutation · <span style="color:#dc2626">red</span> = break</label>
+        <div class="seq" id="rad-seq-out"></div>
+      </div>
+      <div class="row">
+        <label>damage log</label>
+        <div id="rad-comparison"></div>
+      </div>
+      <div class="rs-card" id="rs-result-card">
+        <label style="margin-bottom:10px">Reed-Solomon recovery</label>
+        <div class="stats">
+          <div><div class="stat-label">parity bytes</div><div class="stat-val" id="rsr-parity"></div></div>
+          <div><div class="stat-label">repaired</div><div class="stat-val good" id="rsr-repaired"></div></div>
+          <div><div class="stat-label">lost</div><div class="stat-val bad" id="rsr-unrecoverable"></div></div>
+        </div>
+        <label>recovered strand — <span style="color:var(--G)">green</span> = fixed</label>
+        <div class="rs-out" id="rsr-seq"></div>
+        <div class="rs-text" id="rsr-text"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- GC OPTIMIZER -->
+  <div class="panel" id="panel-optimize">
+    <div class="row">
+      <label>text</label>
+      <textarea id="opt-in" rows="4" placeholder="text to encode with GC optimization…"></textarea>
+    </div>
+    <div id="opt-results" style="display:none">
+      <div class="stats">
+        <div><div class="stat-label">GC before</div><div class="stat-val" id="opt-gc-before"></div></div>
+        <div><div class="stat-label">GC after</div><div class="stat-val" id="opt-gc-after"></div></div>
+        <div><div class="stat-label">XOR mask</div><div class="stat-val" id="opt-mask"></div></div>
+        <div><div class="stat-label">in range</div><div class="stat-val" id="opt-inrange"></div></div>
+      </div>
+      <div class="notice" id="opt-banner"></div>
+      <div class="row">
+        <label>optimized strand</label>
+        <div class="out scroll" id="opt-strand"></div>
+        <button id="opt-copy">copy</button>
+      </div>
+      <div class="row">
+        <label>round-trip check</label>
+        <div class="out" id="opt-decoded"></div>
+      </div>
+    </div>
+    <hr>
+    <p class="ex-body">Each byte is XOR'd with a mask (0–255) before encoding. XOR is its own inverse, so the decoder just XORs again with the same mask. The optimizer tries all 256 values and picks whichever brings GC closest to 50%. Mask is stored in the first 4 bases of the strand.</p>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="panel" id="panel-explain">
+
+    <div class="ex-part">
+      <div class="ex-kicker">part 1</div>
+      <div class="ex-title">how does a character become a DNA sequence?</div>
+      <div class="ex-body">
+        Every character maps to a number (its byte value). That number becomes 8 bits. We split those 8 bits into four 2-bit chunks called <strong>diads</strong>. Each diad maps to one base: <strong class="bA">A</strong>, <strong class="bC">C</strong>, <strong class="bG">G</strong>, or <strong class="bT">T</strong>. So every character always becomes exactly 4 bases.
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin:14px 0">
+        <label style="margin:0;white-space:nowrap">try a character →</label>
+        <input type="text" id="ex-char" maxlength="1" value="H" style="width:52px;text-align:center;font-size:16px;padding:6px">
+      </div>
+      <div id="ex-steps"></div>
+    </div>
+
+    <hr>
+
+    <div class="ex-part">
+      <div class="ex-kicker">part 2</div>
+      <div class="ex-title">what is GC content and why does it matter?</div>
+      <div class="ex-body">
+        Bases pair up: <strong class="bA">A</strong>–<strong class="bT">T</strong> (2 bonds) and <strong class="bC">C</strong>–<strong class="bG">G</strong> (3 bonds). More bonds = more stable. A strand that's mostly G/C is very stable. Mostly A/T = weak.<br><br>
+        The synthesis sweet spot is <strong>40–60% GC</strong>. Too low and the strand falls apart. Too high and it's rigid and hard to work with.
+      </div>
+      <div class="gc-wrap">
+        <div style="color:var(--muted);font-size:11px;margin-bottom:8px">drag to see what different GC% means</div>
+        <input type="range" id="ex-gc-slider" min="0" max="100" value="50" style="width:100%;accent-color:#111;display:block;margin-bottom:8px">
+        <div class="gc-track">
+          <div class="gc-zone"></div>
+          <div class="gc-fill" id="ex-gc-fill" style="width:50%"></div>
+        </div>
+        <div class="gc-labels"><span>0%</span><span>40% ← ideal → 60%</span><span>100%</span></div>
+        <div style="margin-top:10px;font-size:12px;min-height:18px" id="ex-gc-verdict"></div>
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="ex-part">
+      <div class="ex-kicker">part 3</div>
+      <div class="ex-title">why does DNA storage matter?</div>
+      <div class="ex-body">Hard drives last a few years. Magnetic tape: maybe 30. Flash memory: years, not decades. DNA can last much, much longer.</div>
+      <div class="facts">
+        <div class="fact"><div class="fact-n">215 PB</div><div class="fact-d">theoretical density per gram of DNA</div></div>
+        <div class="fact"><div class="fact-n">700K yr</div><div class="fact-d">oldest readable DNA (horse fossil)</div></div>
+        <div class="fact"><div class="fact-n">~5 yr</div><div class="fact-d">average lifespan of a hard drive</div></div>
+      </div>
+      <div class="ex-body">Microsoft, Harvard Wyss, and the European Bioinformatics Institute have all built working DNA storage systems. The encoding layer is solved. The bottleneck is synthesis speed and cost.<br><br><strong>The space angle:</strong> on a Mars or Europa mission, data needs to survive years without maintenance. DNA in a protective medium could outlast any electronic storage — if it can survive the radiation, which is what the radiation tab simulates.</div>
+    </div>
+
+    <hr>
+
+    <div class="ex-part" style="margin-bottom:0">
+      <div class="ex-kicker">part 4</div>
+      <div class="ex-title">how radiation corrupts DNA data</div>
+      <div class="ex-body">
+        Ionizing radiation carries enough energy to physically damage molecules.<br><br>
+        <strong>Base damage</strong> — a particle alters a nucleotide chemically. An A becomes something that reads as C. It's a bit flip at the molecular level.<br><br>
+        <strong>Strand break</strong> — the particle snaps the helix backbone. A section becomes unreadable. In the simulation, these show as <strong style="color:var(--T)">X</strong>.<br><br>
+        Europa is extreme because Jupiter's magnetic field traps charged particles in radiation belts — and Europa orbits inside them. Roughly <strong>540 Sv/day</strong>. Enough to kill a human instantly.
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script src="engine.js"></script>
+<script src="radiation.js"></script>
+<script src="rs.js"></script>
+<script src="explain.js"></script>
+<script src="gc-optimizer.js"></script>
+<script>
+  // engine aliases
+  if (typeof textToBytes === 'undefined' && typeof HelixEngine !== 'undefined') {
+    window.textToBytes   = HelixEngine.textToBytes;
+    window.bytesToText   = HelixEngine.bytesToText;
+    window.encodeBytes   = HelixEngine.encodeBytes;
+    window.decodeStrand  = HelixEngine.decodeStrand;
+    window.gcContent     = HelixEngine.gcContent;
+    window.analyzeStrand = HelixEngine.analyzeStrand;
+    window.encode        = HelixEngine.encode;
+  }
+
+  // tabs
+  document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const t = btn.getAttribute('data-tab');
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + t));
+  }));
+
+  const copy = el => navigator.clipboard?.writeText(el.textContent || '').catch(() => {});
+
+  // ── ENCODE
+  const encIn = document.getElementById('enc-in');
+  encIn.addEventListener('input', () => {
+    const txt = encIn.value;
     const encOut = document.getElementById('enc-out');
-    encIn.addEventListener('input', () => {
-      const txt = encIn.value;
-      if (!txt) {
-        encOut.textContent = 'sequence shows up here';
-        document.getElementById('enc-stats').style.display = 'none';
-        document.getElementById('enc-copy').style.display = 'none';
-        document.getElementById('enc-viz-btn').style.display = 'none';
-        return;
-      }
-      try {
-        const bytes = textToBytes(txt);
-        const strand = encodeBytes(bytes);
-        encOut.textContent = strand;
-        document.getElementById('es-bytes').textContent = bytes.length;
-        document.getElementById('es-bases').textContent = strand.length;
-        const gc = gcContent(strand);
-        const gcEl = document.getElementById('es-gc');
-        gcEl.textContent = (gc * 100).toFixed(1) + '%';
-        gcEl.className = 'stat-num ' + (gc >= 0.4 && gc <= 0.6 ? 'good' : '');
-        document.getElementById('enc-stats').style.display = 'grid';
-        document.getElementById('enc-copy').style.display = '';
-        document.getElementById('enc-viz-btn').style.display = '';
-      } catch (e) {
-        encOut.innerHTML = '<span class="error">' + e.message + '</span>';
-      }
-    });
-    document.getElementById('enc-copy').addEventListener('click', () => copyTextFrom(encOut));
+    if (!txt) {
+      encOut.innerHTML = '<span style="color:#ccc">sequence appears here</span>';
+      document.getElementById('enc-stats').style.display = 'none';
+      document.getElementById('enc-actions').style.display = 'none';
+      document.getElementById('enc-viz').style.display = 'none';
+      vizOn = false; document.getElementById('enc-viz-btn').textContent = 'show colors';
+      return;
+    }
+    try {
+      const bytes = textToBytes(txt), strand = encodeBytes(bytes);
+      encOut.textContent = strand;
+      document.getElementById('es-bytes').textContent = bytes.length;
+      document.getElementById('es-bases').textContent = strand.length;
+      const gc = gcContent(strand), gcEl = document.getElementById('es-gc');
+      gcEl.textContent = (gc * 100).toFixed(1) + '%';
+      gcEl.className = 'stat-val ' + (gc >= 0.4 && gc <= 0.6 ? 'good' : 'warn');
+      document.getElementById('enc-stats').style.display = 'block';
+      document.getElementById('enc-actions').style.display = 'flex';
+    } catch (e) { document.getElementById('enc-out').textContent = 'error: ' + e.message; }
+  });
 
-    let vizOn = false;
-    document.getElementById('enc-viz-btn').addEventListener('click', () => {
-      vizOn = !vizOn;
-      const wrap = document.getElementById('enc-viz');
-      const bases = document.getElementById('enc-bases');
-      bases.innerHTML = '';
-      if (vizOn) {
-        const strand = encOut.textContent || '';
-        for (let i = 0; i < Math.min(strand.length, 280); i++) {
-          const s = document.createElement('span');
-          s.className = 'base b-' + strand[i];
-          s.textContent = strand[i];
-          bases.appendChild(s);
-        }
-        if (strand.length > 280) {
-          const m = document.createElement('span');
-          m.style.color = '#777';
-          m.textContent = '+' + (strand.length - 280) + ' more';
-          bases.appendChild(m);
-        }
-        wrap.style.display = 'block';
-        document.getElementById('enc-viz-btn').textContent = 'Hide colors';
-      } else {
-        wrap.style.display = 'none';
-        document.getElementById('enc-viz-btn').textContent = 'Show colors';
-      }
-    });
+  document.getElementById('enc-copy').addEventListener('click', () => copy(document.getElementById('enc-out')));
 
-    // ---------------------------------------------------------------------------
-    // DECODE
-    // ---------------------------------------------------------------------------
-    const decIn = document.getElementById('dec-in');
-    const decOut = document.getElementById('dec-out');
-    decIn.addEventListener('input', () => {
-      const raw = decIn.value.replace(/\s/g, '').toUpperCase();
-      if (!raw) { decOut.textContent = 'decoded text shows up here'; document.getElementById('dec-copy').style.display = 'none'; return; }
-      try {
-        decOut.textContent = bytesToText(decodeStrand(raw));
-        document.getElementById('dec-copy').style.display = '';
-      } catch (e) {
-        decOut.innerHTML = '<span class="error">' + e.message + '</span>';
-        document.getElementById('dec-copy').style.display = 'none';
-      }
-    });
-    document.getElementById('dec-copy').addEventListener('click', () => copyTextFrom(decOut));
-
-    // ---------------------------------------------------------------------------
-    // ANALYZE
-    // ---------------------------------------------------------------------------
-    document.getElementById('ana-in').addEventListener('input', () => {
-      const raw = document.getElementById('ana-in').value.replace(/\s/g, '').toUpperCase();
-      const body = document.getElementById('ana-body');
-      if (!raw || raw.length < 4) { body.style.display = 'none'; return; }
-      const stats = analyzeStrand(raw);
-      document.getElementById('as-len').textContent = stats.length;
-      document.getElementById('as-gc').textContent = (stats.gcFraction * 100).toFixed(1) + '%';
-      document.getElementById('as-hp').textContent = stats.hpRuns.length;
-      document.getElementById('as-tm').textContent = stats.tm !== null ? stats.tm.toFixed(1) : '';
-      document.getElementById('rc-out').textContent = stats.revComp;
-      document.getElementById('bc-A').textContent = stats.baseCounts.A;
-      document.getElementById('bc-C').textContent = stats.baseCounts.C;
-      document.getElementById('bc-G').textContent = stats.baseCounts.G;
-      document.getElementById('bc-T').textContent = stats.baseCounts.T;
-      body.style.display = 'block';
-    });
-
-    // ---------------------------------------------------------------------------
-    // TRACE
-    // ---------------------------------------------------------------------------
-    document.getElementById('tr-in').addEventListener('input', () => {
-      const txt = document.getElementById('tr-in').value;
-      const body = document.getElementById('tr-body');
-      if (!txt) { body.style.display = 'none'; return; }
-      const strand = encode(txt);
-      const wrap = document.getElementById('tr-bases');
-      wrap.innerHTML = '';
-      for (let i = 0; i < strand.length; i++) {
+  let vizOn = false;
+  document.getElementById('enc-viz-btn').addEventListener('click', () => {
+    vizOn = !vizOn;
+    const viz = document.getElementById('enc-viz');
+    if (vizOn) {
+      const strand = document.getElementById('enc-out').textContent || '';
+      viz.innerHTML = '';
+      for (let i = 0; i < Math.min(strand.length, 400); i++) {
         const s = document.createElement('span');
-        s.className = 'base b-' + strand[i];
+        s.className = 'b' + strand[i];
         s.textContent = strand[i];
-        wrap.appendChild(s);
+        viz.appendChild(s);
       }
-      body.style.display = 'block';
-    });
-
-    // ---------------------------------------------------------------------------
-    // RADIATION — live NOAA flux fetch + RS encode/decode
-    // ---------------------------------------------------------------------------
-    let liveFluxData = {
-      flux: 0.5,
-      source: 'calibrated fallback (published average)',
-      timestamp: 'N/A',
-      readings: 0
-    };
-    let selectedEnv = 'leo';
-
-    async function loadLiveFlux() {
-      const banner = document.getElementById('flux-banner');
-      const dot    = document.getElementById('flux-dot');
-      const text   = document.getElementById('flux-text');
-
-      try {
-        liveFluxData = await fetchLiveFlux();
-        banner.className = 'flux-banner live';
-        dot.className    = 'flux-dot live';
-        text.textContent =
-          `Live NOAA GOES data — solar proton flux: ${liveFluxData.flux.toFixed(4)} pfu ` +
-          `(≥10 MeV, ${liveFluxData.readings} readings, last: ${liveFluxData.timestamp}) ` +
-          `— Source: ${liveFluxData.source}`;
-      } catch (err) {
-        banner.className = 'flux-banner failed';
-        dot.className    = 'flux-dot failed';
-        text.textContent =
-          'Could not reach NOAA API. Using calibrated fallback rates based on published literature.';
-        liveFluxData = { flux: 0.5, source: 'fallback (published average)', timestamp: 'N/A', readings: 0 };
-      }
+      if (strand.length > 400) { const m = document.createElement('span'); m.style.color='#ccc'; m.textContent=' +' + (strand.length - 400) + ' more'; viz.appendChild(m); }
+      viz.style.display = 'block';
+      document.getElementById('enc-viz-btn').textContent = 'hide colors';
+    } else {
+      viz.style.display = 'none';
+      document.getElementById('enc-viz-btn').textContent = 'show colors';
     }
+  });
 
-    // Load flux when radiation tab is first opened
-    let fluxLoaded = false;
-    document.querySelectorAll('.tab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (btn.getAttribute('data-tab') === 'radiation' && !fluxLoaded) {
-          fluxLoaded = true;
-          loadLiveFlux();
-        }
-      });
-    });
+  // ── DECODE
+  document.getElementById('dec-in').addEventListener('input', function() {
+    const raw = this.value.replace(/\s/g,'').toUpperCase();
+    const out = document.getElementById('dec-out');
+    if (!raw) { out.innerHTML = '<span style="color:#ccc">result appears here</span>'; document.getElementById('dec-actions').style.display='none'; return; }
+    try {
+      out.textContent = bytesToText(decodeStrand(raw));
+      document.getElementById('dec-actions').style.display = 'block';
+    } catch(e) { out.textContent = 'error: ' + e.message; document.getElementById('dec-actions').style.display='none'; }
+  });
+  document.getElementById('dec-copy').addEventListener('click', () => copy(document.getElementById('dec-out')));
 
-    // Environment selector
-    document.querySelectorAll('.env-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.env-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedEnv = btn.getAttribute('data-env');
-      });
-    });
+  // ── ANALYZE
+  document.getElementById('ana-in').addEventListener('input', function() {
+    const raw = this.value.replace(/\s/g,'').toUpperCase();
+    const body = document.getElementById('ana-body');
+    if (!raw || raw.length < 4) { body.style.display='none'; return; }
+    const s = analyzeStrand(raw);
+    document.getElementById('as-len').textContent = s.length;
+    document.getElementById('as-gc').textContent  = (s.gcFraction * 100).toFixed(1) + '%';
+    document.getElementById('as-tm').textContent  = s.tm !== null ? s.tm.toFixed(1) + ' °C' : 'n/a';
+    document.getElementById('as-hp').textContent  = s.hpRuns.length;
+    document.getElementById('rc-out').textContent = s.revComp;
+    document.getElementById('bc-A').textContent   = s.baseCounts.A;
+    document.getElementById('bc-C').textContent   = s.baseCounts.C;
+    document.getElementById('bc-G').textContent   = s.baseCounts.G;
+    document.getElementById('bc-T').textContent   = s.baseCounts.T;
+    body.style.display = 'block';
+  });
 
-    // Duration slider
-    const durSlider  = document.getElementById('dur-slider');
-    const durDisplay = document.getElementById('dur-display');
-    durSlider.addEventListener('input', () => { durDisplay.textContent = durSlider.value; });
-
-    // RS parity slider
-    const rsSlider        = document.getElementById('rs-parity-slider');
-    const rsParityDisplay = document.getElementById('rs-parity-display');
-    const rsTVal          = document.getElementById('rs-t-val');
-    const rsOverheadVal   = document.getElementById('rs-overhead-val');
-    const rsModeChip      = document.getElementById('rs-mode-chip');
-
-    function updateRsInfo() {
-      const p = parseInt(rsSlider.value);
-      rsParityDisplay.textContent = p;
-      rsTVal.textContent = Math.floor(p / 2);
-      // each parity byte = 4 bases overhead on top of data bases
-      // overhead % relative to data portion shown roughly
-      const dataBases = (encode(document.getElementById('rad-in').value || 'x')).length;
-      const parityBases = p * 4;
-      const pct = dataBases > 0 ? ((parityBases / dataBases) * 100).toFixed(0) : '—';
-      rsOverheadVal.textContent = p === 0 ? '0%' : `~${pct}% extra bases`;
-      rsModeChip.innerHTML = p === 0
-        ? 'mode: <strong style="color:#f87171">disabled</strong>'
-        : 'mode: <strong style="color:#6ee7b7">active</strong>';
+  // ── TRACE
+  document.getElementById('tr-in').addEventListener('input', function() {
+    const body = document.getElementById('tr-body');
+    if (!this.value) { body.style.display='none'; return; }
+    const strand = encode(this.value);
+    const wrap = document.getElementById('tr-bases');
+    wrap.innerHTML = '';
+    for (let i = 0; i < strand.length; i++) {
+      const s = document.createElement('span'); s.className = 'b' + strand[i]; s.textContent = strand[i];
+      wrap.appendChild(s);
+      if ((i+1) % 4 === 0 && i < strand.length - 1) { const g = document.createTextNode(' '); wrap.appendChild(g); }
     }
-    rsSlider.addEventListener('input', updateRsInfo);
-    document.getElementById('rad-in').addEventListener('input', () => {
-      updateRsInfo();
-      const note = document.getElementById('rad-input-note');
-      const val  = document.getElementById('rad-in').value;
-      note.textContent = val ? encode(val).length + ' bases will be simulated' : '';
-    });
+    body.style.display = 'block';
+  });
+
+  // ── RADIATION
+  let liveFluxData = { flux: 0.5, source: 'fallback', timestamp: 'N/A', readings: 0 };
+  let selectedEnv = 'leo';
+
+  async function loadLiveFlux() {
+    const banner = document.getElementById('flux-banner');
+    const dot = document.getElementById('flux-dot'), txt = document.getElementById('flux-text');
+    try {
+      liveFluxData = await fetchLiveFlux();
+      dot.className = 'flux-dot live';
+      txt.textContent = `live NOAA — ${liveFluxData.flux.toFixed(4)} pfu (≥10 MeV, ${liveFluxData.readings} readings)`;
+    } catch(e) {
+      dot.className = 'flux-dot err';
+      txt.textContent = 'NOAA unreachable — using calibrated fallback rates';
+      liveFluxData = { flux: 0.5, source: 'fallback', timestamp: 'N/A', readings: 0 };
+    }
+  }
+
+  let fluxLoaded = false;
+  document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+    if (btn.getAttribute('data-tab') === 'radiation' && !fluxLoaded) { fluxLoaded = true; loadLiveFlux(); }
+  }));
+
+  document.querySelectorAll('.env-btn').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.env-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active'); selectedEnv = btn.getAttribute('data-env');
+  }));
+
+  const durSlider = document.getElementById('dur-slider');
+  durSlider.addEventListener('input', () => document.getElementById('dur-display').textContent = durSlider.value);
+
+  const rsSlider = document.getElementById('rs-parity-slider');
+  function updateRsInfo() {
+    const p = parseInt(rsSlider.value);
+    document.getElementById('rs-parity-display').textContent = p;
+    const dataBases = (encode(document.getElementById('rad-in').value || 'x')).length;
+    const pct = ((p * 4 / dataBases) * 100).toFixed(0);
+    document.getElementById('rs-mode-chip').innerHTML = p === 0
+      ? 'disabled — no error correction'
+      : `active — can fix up to ${Math.floor(p/2)} byte errors · ~${pct}% overhead`;
+  }
+  rsSlider.addEventListener('input', updateRsInfo);
+  document.getElementById('rad-in').addEventListener('input', () => {
     updateRsInfo();
+    const val = document.getElementById('rad-in').value;
+    document.getElementById('rad-input-note').textContent = val ? encode(val).length + ' bases' : '';
+  });
+  updateRsInfo();
 
-    // Run simulation
-    document.getElementById('rad-run').addEventListener('click', () => {
-      const txt = document.getElementById('rad-in').value.trim();
-      if (!txt) { alert('Please enter some text to encode first.'); return; }
+  document.getElementById('rad-run').addEventListener('click', () => {
+    const txt = document.getElementById('rad-in').value.trim();
+    if (!txt) { alert('enter some text first'); return; }
 
-      const parityBytes = parseInt(rsSlider.value);
-      const useRS       = parityBytes > 0 && typeof RSCodec !== 'undefined';
+    const parityBytes = parseInt(rsSlider.value);
+    const useRS = parityBytes > 0 && typeof RSCodec !== 'undefined';
+    let strandToSimulate, rsCodec = null, originalBytes = null;
 
-      // --- RS encode: prepend parity bases to the strand ---
-      let strandToSimulate;
-      let rsCodec = null;
-      let originalBytes = null;
-      if (useRS) {
-        try {
-          rsCodec       = new RSCodec(parityBytes);
-          originalBytes = textToBytes(txt);
-          const encoded = rsCodec.encode(originalBytes);   // Uint8Array with parity appended
-          strandToSimulate = encodeBytes(Array.from(encoded));
-        } catch (e) {
-          console.warn('RS encode failed, falling back to plain strand:', e);
-          strandToSimulate = encode(txt);
-          rsCodec = null;
-        }
-      } else {
-        strandToSimulate = encode(txt);
-      }
-
-      const years   = parseInt(durSlider.value);
-      const results = simulateRadiation(strandToSimulate, selectedEnv, years, liveFluxData.flux);
-      const summary = summarizeDamage(results);
-
-      document.getElementById('rad-results').style.display = 'block';
-
-      // Stats
-      document.getElementById('rs-total').textContent   = summary.total;
-      document.getElementById('rs-damaged').textContent  = summary.damaged;
-      document.getElementById('rs-changes').textContent  = summary.baseChanges;
-      document.getElementById('rs-breaks').textContent   = summary.unreadable;
-
-      // Recovery banner
-      const banner    = document.getElementById('rad-recovery-banner');
-      const pct       = (summary.damageFraction * 100).toFixed(2);
-      const envLabel  = ENVIRONMENTS[selectedEnv].label;
-      const rsNote    = useRS
-        ? ` RS-${parityBytes} parity active (can correct up to ${Math.floor(parityBytes/2)} byte errors).`
-        : ' No error correction applied.';
-      if (summary.recoverable) {
-        banner.className = 'recovery-banner ok';
-        banner.innerHTML =
-          `✓ <strong>Data likely recoverable.</strong> ${pct}% of bases damaged after ${years} year(s) in ${envLabel}. ` +
-          `Within the ~5% threshold where Reed-Solomon error correction could restore the original sequence.${rsNote} ` +
-          `Live flux used: ${liveFluxData.flux.toFixed(4)} pfu (${liveFluxData.source}).`;
-      } else {
-        banner.className = 'recovery-banner bad';
-        banner.innerHTML =
-          `✗ <strong>Data integrity compromised.</strong> ${pct}% of bases damaged after ${years} year(s) in ${envLabel}. ` +
-          `Beyond the ~5% threshold for standard error correction without heavy redundancy.${rsNote} ` +
-          `Live flux used: ${liveFluxData.flux.toFixed(4)} pfu (${liveFluxData.source}).`;
-      }
-
-      // Sequence render
-      const seqOut = document.getElementById('rad-seq-out');
-      seqOut.innerHTML = '';
-      for (const r of results) {
-        const span = document.createElement('span');
-        if (r.damageType === 'none') {
-          span.className = 'seq-ok';
-        } else if (r.damageType === 'base_change') {
-          span.className = 'seq-damaged';
-          span.title = `Position ${r.index}: ${r.original} → ${r.result}`;
-        } else {
-          span.className = 'seq-unreadable';
-          span.title = `Position ${r.index}: strand break`;
-        }
-        span.textContent = r.result;
-        seqOut.appendChild(span);
-      }
-
-      // Comparison — damaged bases only
-      const compEl  = document.getElementById('rad-comparison');
-      compEl.innerHTML = '';
-      const changed = results.filter(r => r.damageType !== 'none');
-
-      if (changed.length === 0) {
-        compEl.innerHTML = '<div style="color:#6ee7b7;font-size:13px;padding:8px 0">No damage detected — all bases intact.</div>';
-      } else {
-        for (const r of changed) {
-          const byteIndex = Math.floor(r.index / 4);
-          const posInByte = r.index % 4;
-          const row = document.createElement('div');
-          row.className = 'cmp-row';
-
-          const pos = document.createElement('span');
-          pos.className = 'cmp-pos';
-          pos.textContent = `base ${r.index}  (byte ${byteIndex}, pos ${posInByte})`;
-
-          const arrow = document.createElement('span');
-          arrow.className = 'cmp-arrow';
-          arrow.textContent = '→';
-
-          const val = document.createElement('span');
-          if (r.damageType === 'base_change') {
-            val.className = 'cmp-val changed';
-            val.textContent = `${r.original} → ${r.result}  (base substitution)`;
-          } else {
-            val.className = 'cmp-val unreadable';
-            val.textContent = `${r.original} → X  (strand break)`;
-          }
-
-          row.appendChild(pos);
-          row.appendChild(arrow);
-          row.appendChild(val);
-          compEl.appendChild(row);
-        }
-      }
-
-      // --- RS decode: attempt recovery ---
-      const rsCard = document.getElementById('rs-result-card');
-      if (useRS && rsCodec) {
-        rsCard.style.display = 'block';
-
-        // Build damaged strand string from results
-        const damagedStrand = results.map(r => r.result).join('');
-
-        // Decode damaged strand back to bytes (strand breaks become erasures: use 0x00 placeholder)
-        const damagedBytes = [];
-        const erasurePositions = [];
-        for (let i = 0; i < damagedStrand.length; i += 4) {
-          const chunk = damagedStrand.slice(i, i + 4);
-          // Check for strand breaks (X characters)
-          if (chunk.includes('X')) {
-            damagedBytes.push(0);   // placeholder
-            erasurePositions.push(damagedBytes.length - 1);
-          } else {
-            try {
-              const decoded = decodeStrand(chunk);
-              damagedBytes.push(decoded[0] !== undefined ? decoded[0] : 0);
-            } catch {
-              damagedBytes.push(0);
-              erasurePositions.push(damagedBytes.length - 1);
-            }
-          }
-        }
-
-        let recoveredBytes = null;
-        let repairedCount  = 0;
-        let unrecoverable  = 0;
-        let status         = 'failed';
-        let decodedText    = '';
-
-        try {
-          const recovered = rsCodec.decode(new Uint8Array(damagedBytes), erasurePositions);
-          recoveredBytes  = recovered;
-
-          // Count repairs by comparing damagedBytes to recoveredBytes (data portion only)
-          const dataLen = originalBytes.length;
-          for (let i = 0; i < dataLen; i++) {
-            if (damagedBytes[i] !== recoveredBytes[i]) repairedCount++;
-          }
-
-          // Convert data portion only back to text
-          decodedText = bytesToText(Array.from(recoveredBytes.slice(0, dataLen)));
-          status      = decodedText === txt ? 'full' : 'partial';
-        } catch (e) {
-          // RS decode failed — too many errors
-          unrecoverable = erasurePositions.length + changed.length;
-          status = 'failed';
-          decodedText = 'Recovery failed — damage exceeds RS correction capacity.';
-        }
-
-        // Stats
-        document.getElementById('rsr-parity').textContent       = parityBytes;
-        document.getElementById('rsr-repaired').textContent     = repairedCount;
-        document.getElementById('rsr-unrecoverable').textContent = unrecoverable;
-        document.getElementById('rsr-repaired').className       = 'stat-num ' + (repairedCount > 0 ? 'warn' : 'good');
-        document.getElementById('rsr-unrecoverable').className  = 'stat-num ' + (unrecoverable > 0 ? 'danger' : 'good');
-
-        // Recovered sequence visual
-        const rsSeqEl = document.getElementById('rsr-seq');
-        rsSeqEl.innerHTML = '';
-        if (recoveredBytes) {
-          const recoveredStrand = encodeBytes(Array.from(recoveredBytes));
-          for (let i = 0; i < recoveredStrand.length; i++) {
-            const span = document.createElement('span');
-            const origBase = strandToSimulate[i];
-            const dmgBase  = results[i] ? results[i].result : origBase;
-            const recBase  = recoveredStrand[i];
-            if (dmgBase === 'X' || dmgBase !== origBase) {
-              if (recBase === origBase) {
-                span.className = 'rs-base-repaired';
-              } else {
-                span.className = 'rs-base-lost';
-              }
-            } else {
-              span.className = 'rs-base-ok';
-            }
-            span.textContent = recBase;
-            rsSeqEl.appendChild(span);
-          }
-        } else {
-          rsSeqEl.innerHTML = '<span style="color:#ef4444">Unable to reconstruct sequence.</span>';
-        }
-
-        // Decoded text
-        const rsTextEl = document.getElementById('rsr-text');
-        rsTextEl.className = 'rs-decoded-text ' + status;
-        if (status === 'full') {
-          rsTextEl.textContent = `✓ Full recovery — "${decodedText}"`;
-        } else if (status === 'partial') {
-          rsTextEl.textContent = `~ Partial recovery — "${decodedText}"`;
-        } else {
-          rsTextEl.textContent = decodedText;
-        }
-
-      } else if (!useRS) {
-        rsCard.style.display = 'none';
-      } else {
-        rsCard.style.display = 'block';
-        document.getElementById('rsr-parity').textContent        = parityBytes;
-        document.getElementById('rsr-repaired').textContent      = '—';
-        document.getElementById('rsr-unrecoverable').textContent = '—';
-        document.getElementById('rsr-seq').textContent           = 'rs.js not loaded';
-        const rsTextEl = document.getElementById('rsr-text');
-        rsTextEl.className   = 'rs-decoded-text failed';
-        rsTextEl.textContent = 'RS library (rs.js) not available.';
-      }
-
-      document.getElementById('rad-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-
-    // ---------------------------------------------------------------------------
-    // EXPLAIN — interactive character breakdown
-    // ---------------------------------------------------------------------------
-    const BASE_COLOR = { A:'#a78bfa', C:'#93c5fd', G:'#6ee7b7', T:'#fda4af' };
-    const BASE_BG    = { A:'rgba(167,139,250,0.12)', C:'rgba(147,197,253,0.1)', G:'rgba(110,231,183,0.1)', T:'rgba(253,164,175,0.1)' };
-
-    function renderCharBreakdown(char) {
-      if (!char) return;
-      const info = explainChar(char);
-      const steps = document.getElementById('ex-steps');
-      steps.innerHTML = '';
-
-      const r1 = document.createElement('div'); r1.className = 'char-step';
-      r1.innerHTML = `<span class="step-label">Character</span><span class="step-val" style="color:#fff;font-size:20px;font-weight:700">"${info.char}"</span><span style="color:#444;margin:0 8px">→</span><span class="step-val">byte <strong style="color:#fff">${info.byte}</strong></span>`;
-      steps.appendChild(r1);
-
-      const r2 = document.createElement('div'); r2.className = 'char-step';
-      r2.innerHTML = `<span class="step-label">Binary</span><span class="step-val">${info.binary}</span>`;
-      steps.appendChild(r2);
-
-      const r3 = document.createElement('div'); r3.className = 'char-step';
-      const diadsHtml = info.diads.map((d, i) =>
-        `<span class="diad" style="background:${BASE_BG[info.bases[i]]};color:${BASE_COLOR[info.bases[i]]}">${d}</span>`
-      ).join('');
-      r3.innerHTML = `<span class="step-label">Split</span><span class="step-val">${diadsHtml}</span>`;
-      steps.appendChild(r3);
-
-      const r4 = document.createElement('div'); r4.className = 'char-step';
-      const basesHtml = info.bases.map(b =>
-        `<span class="base-chip" style="background:${BASE_BG[b]};color:${BASE_COLOR[b]}">${b}</span>`
-      ).join('');
-      r4.innerHTML = `<span class="step-label">Bases</span><span class="step-val">${basesHtml}</span>`;
-      steps.appendChild(r4);
-
-      const r5 = document.createElement('div'); r5.className = 'char-step';
-      r5.innerHTML = `<span class="step-label">Result</span><span class="step-val" style="font-size:18px;letter-spacing:2px">${
-        info.bases.map(b => `<span style="color:${BASE_COLOR[b]};font-weight:700">${b}</span>`).join('')
-      }</span>`;
-      steps.appendChild(r5);
-    }
-
-    const exChar = document.getElementById('ex-char');
-    exChar.addEventListener('input', () => renderCharBreakdown(exChar.value[0] || ''));
-
-    let explainInitialized = false;
-    document.querySelectorAll('.tab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (btn.getAttribute('data-tab') === 'explain' && !explainInitialized) {
-          explainInitialized = true;
-          renderCharBreakdown('H');
-          updateGC();
-        }
-      });
-    });
-
-    const gcSlider  = document.getElementById('ex-gc-slider');
-    const gcFill    = document.getElementById('ex-gc-fill');
-    const gcVerdict = document.getElementById('ex-gc-verdict');
-
-    function updateGC() {
-      const val = parseInt(gcSlider.value);
-      gcFill.style.width = val + '%';
-      if (val < 40) {
-        gcVerdict.innerHTML = `<span style="color:#f87171">${val}% GC — too low. The strand is AT-rich and weak. It would likely fall apart during synthesis or storage.</span>`;
-      } else if (val > 60) {
-        gcVerdict.innerHTML = `<span style="color:#f87171">${val}% GC — too high. The strand is very rigid and hard to work with chemically.</span>`;
-      } else {
-        gcVerdict.innerHTML = `<span style="color:#6ee7b7">${val}% GC — ideal range. Stable enough to synthesize and store reliably.</span>`;
-      }
-    }
-    gcSlider.addEventListener('input', updateGC);
-    updateGC();
-
-    // ---------------------------------------------------------------------------
-    // OPTIMIZE
-    // ---------------------------------------------------------------------------
-    const optIn = document.getElementById('opt-in');
-
-    optIn.addEventListener('input', () => {
-      const txt = optIn.value.trim();
-      const results = document.getElementById('opt-results');
-      if (!txt) { results.style.display = 'none'; return; }
-
-      const result = optimizeText(txt);
-      results.style.display = 'block';
-
-      const gcB = (result.gcBefore * 100).toFixed(1) + '%';
-      const gcA = (result.gcAfter  * 100).toFixed(1) + '%';
-
-      document.getElementById('opt-gc-before').textContent = gcB;
-      document.getElementById('opt-gc-before').className   = 'stat-num ' +
-        (result.gcBefore >= 0.4 && result.gcBefore <= 0.6 ? 'good' : 'warn');
-
-      document.getElementById('opt-gc-after').textContent  = gcA;
-      document.getElementById('opt-gc-after').className    = 'stat-num ' +
-        (result.inRange ? 'good' : 'warn');
-
-      document.getElementById('opt-mask').textContent    = result.mask;
-      document.getElementById('opt-inrange').textContent = result.inRange ? '✓ yes' : '✗ no';
-      document.getElementById('opt-inrange').className   = 'stat-num ' + (result.inRange ? 'good' : 'danger');
-
-      const banner = document.getElementById('opt-banner');
-      if (result.inRange) {
-        banner.style.background = 'rgba(110,231,183,0.06)';
-        banner.style.border     = '1px solid rgba(110,231,183,0.2)';
-        banner.style.color      = '#6ee7b7';
-        banner.textContent      = `GC improved from ${gcB} → ${gcA} using XOR mask ${result.mask}. Strand is within the 40–60% synthesis window.`;
-      } else {
-        banner.style.background = 'rgba(251,191,36,0.06)';
-        banner.style.border     = '1px solid rgba(251,191,36,0.2)';
-        banner.style.color      = '#fbbf24';
-        banner.textContent      = `Best achievable GC is ${gcA} with mask ${result.mask}. This text's byte distribution makes ideal GC difficult — try longer input.`;
-      }
-
-      document.getElementById('opt-strand').textContent = result.strand;
-
+    if (useRS) {
       try {
-        const recovered = decodeOptimizedText(result.strand);
-        document.getElementById('opt-decoded').textContent = recovered === txt
-          ? `✓ Round-trip verified — "${recovered}"`
-          : `⚠ Mismatch: got "${recovered}"`;
-      } catch (e) {
-        document.getElementById('opt-decoded').textContent = '✗ Decode error: ' + e.message;
-      }
-    });
+        rsCodec = new RSCodec(parityBytes);
+        originalBytes = textToBytes(txt);
+        strandToSimulate = encodeBytes(Array.from(rsCodec.encode(originalBytes)));
+      } catch(e) { strandToSimulate = encode(txt); rsCodec = null; }
+    } else { strandToSimulate = encode(txt); }
 
-    document.getElementById('opt-copy').addEventListener('click', () => {
-      copyTextFrom(document.getElementById('opt-strand'));
+    const years = parseInt(durSlider.value);
+    const results = simulateRadiation(strandToSimulate, selectedEnv, years, liveFluxData.flux);
+    const summary = summarizeDamage(results);
+
+    document.getElementById('rad-results').style.display = 'block';
+    document.getElementById('rs-total').textContent   = summary.total;
+    document.getElementById('rs-damaged').textContent = summary.damaged;
+    document.getElementById('rs-changes').textContent = summary.baseChanges;
+    document.getElementById('rs-breaks').textContent  = summary.unreadable;
+
+    const pct = (summary.damageFraction * 100).toFixed(2);
+    const rsNote = useRS ? ` RS-${parityBytes} active.` : ' No ECC.';
+    const banner = document.getElementById('rad-recovery-banner');
+    if (summary.recoverable) {
+      banner.className = 'rec-banner ok';
+      banner.innerHTML = `✓ likely recoverable — ${pct}% damaged after ${years} yr in ${ENVIRONMENTS[selectedEnv].label}.${rsNote}`;
+    } else {
+      banner.className = 'rec-banner bad';
+      banner.innerHTML = `✗ data compromised — ${pct}% damaged after ${years} yr in ${ENVIRONMENTS[selectedEnv].label}. Beyond ~5% ECC threshold.${rsNote}`;
+    }
+
+    const seqOut = document.getElementById('rad-seq-out');
+    seqOut.innerHTML = '';
+    for (const r of results) {
+      const s = document.createElement('span');
+      s.className = r.damageType === 'none' ? 'seq-ok' : r.damageType === 'base_change' ? 'seq-mut' : 'seq-brk';
+      if (r.damageType !== 'none') s.title = `pos ${r.index}: ${r.original} → ${r.result}`;
+      s.textContent = r.result;
+      seqOut.appendChild(s);
+    }
+
+    const comp = document.getElementById('rad-comparison');
+    comp.innerHTML = '';
+    const changed = results.filter(r => r.damageType !== 'none');
+    if (!changed.length) {
+      comp.innerHTML = '<div style="color:#aaa;font-size:12px;padding:4px 0">no damage detected</div>';
+    } else {
+      for (const r of changed) {
+        const row = document.createElement('div'); row.className = 'dmg-row';
+        row.innerHTML = `<span class="dmg-pos">base ${r.index} (byte ${Math.floor(r.index/4)}, pos ${r.index%4})</span>
+          <span>→</span>
+          <span class="dmg-val ${r.damageType === 'base_change' ? 'mut' : 'brk'}">${r.damageType === 'base_change' ? r.original + ' → ' + r.result + ' (sub)' : r.original + ' → X (break)'}</span>`;
+        comp.appendChild(row);
+      }
+    }
+
+    const rsCard = document.getElementById('rs-result-card');
+    if (useRS && rsCodec) {
+      rsCard.style.display = 'block';
+      const damagedStrand = results.map(r => r.result).join('');
+      const damagedBytes = [], erasurePos = [];
+      for (let i = 0; i < damagedStrand.length; i += 4) {
+        const chunk = damagedStrand.slice(i, i+4);
+        if (chunk.includes('X')) { damagedBytes.push(0); erasurePos.push(damagedBytes.length-1); }
+        else { try { const d = decodeStrand(chunk); damagedBytes.push(d[0] ?? 0); } catch { damagedBytes.push(0); erasurePos.push(damagedBytes.length-1); } }
+      }
+      let recoveredBytes = null, repairedCount = 0, unrecoverable = 0, status = 'failed', decodedText = '';
+      try {
+        recoveredBytes = rsCodec.decode(new Uint8Array(damagedBytes), erasurePos);
+        const dl = originalBytes.length;
+        for (let i = 0; i < dl; i++) if (damagedBytes[i] !== recoveredBytes[i]) repairedCount++;
+        decodedText = bytesToText(Array.from(recoveredBytes.slice(0, dl)));
+        status = decodedText === txt ? 'full' : 'partial';
+      } catch(e) { unrecoverable = erasurePos.length + changed.length; decodedText = 'recovery failed — too much damage for RS to correct'; }
+
+      document.getElementById('rsr-parity').textContent        = parityBytes;
+      document.getElementById('rsr-repaired').textContent      = repairedCount;
+      document.getElementById('rsr-unrecoverable').textContent = unrecoverable;
+
+      const rsSeq = document.getElementById('rsr-seq'); rsSeq.innerHTML = '';
+      if (recoveredBytes) {
+        const rs = encodeBytes(Array.from(recoveredBytes));
+        for (let i = 0; i < rs.length; i++) {
+          const s = document.createElement('span');
+          const orig = strandToSimulate[i], dmg = results[i]?.result ?? orig, rec = rs[i];
+          s.className = (dmg === 'X' || dmg !== orig) ? (rec === orig ? 'rs-rep' : 'rs-los') : 'rs-neu';
+          s.textContent = rec; rsSeq.appendChild(s);
+        }
+      } else { rsSeq.innerHTML = '<span style="color:#dc2626">unable to reconstruct</span>'; }
+
+      const rsText = document.getElementById('rsr-text');
+      rsText.className = 'rs-text';
+      rsText.textContent = status === 'full' ? `✓ full recovery — "${decodedText}"` : status === 'partial' ? `~ partial — "${decodedText}"` : decodedText;
+    } else {
+      rsCard.style.display = useRS ? 'block' : 'none';
+    }
+
+    document.getElementById('rad-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  // ── EXPLAIN
+  const BASE_COLOR = { A:'var(--A)', C:'var(--C)', G:'var(--G)', T:'var(--T)' };
+  const BASE_BG    = { A:'rgba(124,58,237,.1)', C:'rgba(37,99,235,.1)', G:'rgba(5,150,105,.1)', T:'rgba(220,38,38,.1)' };
+
+  function renderChar(char) {
+    if (!char) return;
+    const info = explainChar(char);
+    const steps = document.getElementById('ex-steps');
+    steps.innerHTML = '';
+
+    const rows = [
+      `<span class="char-key">character</span><span style="font-size:18px;font-weight:500">"${info.char}"</span> <span style="color:var(--muted);margin:0 4px">→</span> byte <strong>${info.byte}</strong>`,
+      `<span class="char-key">binary</span> ${info.binary}`,
+      `<span class="char-key">split</span> ${info.diads.map((d,i) => `<span class="diad" style="background:${BASE_BG[info.bases[i]]};color:${BASE_COLOR[info.bases[i]]}">${d}</span>`).join('')}`,
+      `<span class="char-key">bases</span> ${info.bases.map(b => `<span class="b-chip" style="background:${BASE_BG[b]};color:${BASE_COLOR[b]}">${b}</span>`).join('')}`,
+      `<span class="char-key">result</span> <span style="font-size:16px;letter-spacing:2px">${info.bases.map(b => `<span style="color:${BASE_COLOR[b]};font-weight:500">${b}</span>`).join('')}</span>`,
+    ];
+    rows.forEach(html => {
+      const d = document.createElement('div'); d.className = 'char-row'; d.innerHTML = html; steps.appendChild(d);
     });
-  </script>
+  }
+
+  document.getElementById('ex-char').addEventListener('input', function() { renderChar(this.value[0] || ''); });
+
+  let explainInit = false;
+  document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+    if (btn.getAttribute('data-tab') === 'explain' && !explainInit) { explainInit = true; renderChar('H'); updateGC(); }
+  }));
+
+  const gcSlider = document.getElementById('ex-gc-slider');
+  function updateGC() {
+    const v = parseInt(gcSlider.value);
+    document.getElementById('ex-gc-fill').style.width = v + '%';
+    const verdict = document.getElementById('ex-gc-verdict');
+    if (v < 40) verdict.innerHTML = `<span style="color:var(--T)">${v}% — too low. AT-rich, weak, likely to fall apart.</span>`;
+    else if (v > 60) verdict.innerHTML = `<span style="color:var(--T)">${v}% — too high. Very rigid, hard to work with chemically.</span>`;
+    else verdict.innerHTML = `<span style="color:var(--G)">${v}% — ideal. Stable and synthesizable.</span>`;
+  }
+  gcSlider.addEventListener('input', updateGC);
+  updateGC();
+
+  // ── OPTIMIZE
+  document.getElementById('opt-in').addEventListener('input', function() {
+    const txt = this.value.trim();
+    const res = document.getElementById('opt-results');
+    if (!txt) { res.style.display='none'; return; }
+    const result = optimizeText(txt);
+    res.style.display = 'block';
+    const gcB = (result.gcBefore*100).toFixed(1)+'%', gcA = (result.gcAfter*100).toFixed(1)+'%';
+    document.getElementById('opt-gc-before').className = 'stat-val ' + (result.gcBefore>=0.4&&result.gcBefore<=0.6?'good':'warn');
+    document.getElementById('opt-gc-before').textContent = gcB;
+    document.getElementById('opt-gc-after').className = 'stat-val ' + (result.inRange?'good':'warn');
+    document.getElementById('opt-gc-after').textContent = gcA;
+    document.getElementById('opt-mask').textContent = result.mask;
+    document.getElementById('opt-inrange').textContent = result.inRange ? '✓ yes' : '✗ no';
+    document.getElementById('opt-inrange').className = 'stat-val ' + (result.inRange?'good':'bad');
+    const b = document.getElementById('opt-banner');
+    b.className = 'notice ' + (result.inRange ? 'ok' : 'info');
+    b.textContent = result.inRange
+      ? `${gcB} → ${gcA} using mask ${result.mask}. Within 40–60% window.`
+      : `Best achievable: ${gcA} with mask ${result.mask}. Try longer input.`;
+    document.getElementById('opt-strand').textContent = result.strand;
+    try {
+      const rec = decodeOptimizedText(result.strand);
+      document.getElementById('opt-decoded').textContent = rec === txt ? `✓ "${rec}"` : `⚠ mismatch: "${rec}"`;
+    } catch(e) { document.getElementById('opt-decoded').textContent = 'decode error: ' + e.message; }
+  });
+
+  document.getElementById('opt-copy').addEventListener('click', () => copy(document.getElementById('opt-strand')));
+</script>
 </body>
 </html>
