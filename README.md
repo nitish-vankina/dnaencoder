@@ -10,7 +10,7 @@ dnatools is a browser-based tool that converts text into DNA using 2-bit encodin
 
 ## What It Does
 
-DNA can store data. Each base (A, C, G, T) holds 2 bits, so any text can be mapped to a real nucleotide sequence and back. This project makes that process visual and interactive.
+DNA can store data. Each base (A, C, G, T) holds 2 bits, so any text can be mapped to a real nucleotide sequence and back. This project makes that process visual and int eractive.
 
 **Four tools in one:**
 
