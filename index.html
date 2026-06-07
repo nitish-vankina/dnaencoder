@@ -134,6 +134,25 @@
     .cmp-val.changed { color:#f87171; font-weight:700 }
     .cmp-val.unreadable { color:#ef4444; font-weight:700 }
     .rad-input-note { font-size:11px; color:#555; margin-top:6px }
+    /* RS parity slider */
+    .rs-parity-wrap { display:flex; flex-direction:column; gap:8px }
+    .rs-parity-slider { width:100%; accent-color:#ef4444; cursor:pointer }
+    .rs-parity-display { font-size:22px; font-weight:700; color:#fff }
+    .rs-parity-unit { font-size:12px; color:#555; margin-left:4px }
+    .rs-info-row { display:flex; gap:10px; margin-top:6px; flex-wrap:wrap }
+    .rs-info-chip { background:#0a0a0a; border:1px solid #1e1e1e; border-radius:8px; padding:8px 12px; font-size:12px; color:#666 }
+    .rs-info-chip strong { color:#ccc }
+    /* RS recovery result */
+    .rs-recovery-card { background:#111; border:1px solid #1e1e1e; border-radius:12px; padding:16px; margin-bottom:12px }
+    .rs-recovered-seq { font-family:monospace; font-size:12px; line-height:1.9; word-break:break-all; background:#0d0d0d; border:1px solid #1e1e1e; border-radius:8px; padding:12px; margin-top:8px }
+    .rs-base-ok { color:#6ee7b7 }
+    .rs-base-repaired { color:#fbbf24; font-weight:700 }
+    .rs-base-lost { color:#ef4444; font-weight:700 }
+    .rs-decoded-text { margin-top:10px; font-size:14px; padding:10px 14px; border-radius:8px; font-family:'Space Grotesk',sans-serif }
+    .rs-decoded-text.full { background:rgba(110,231,183,0.08); border:1px solid rgba(110,231,183,0.2); color:#6ee7b7 }
+    .rs-decoded-text.partial { background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.2); color:#fbbf24 }
+    .rs-decoded-text.failed { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); color:#fca5a5 }
+    .rs-stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px }
   </style>
 </head>
 <body>
@@ -144,6 +163,7 @@
   <main>
     <h1>Encode text as DNA</h1>
     <p class="subtitle">Convert any text into a real DNA sequence using 2-bit encoding</p>
+    <p class="subtitle" id="welcome-hint" style="margin-top:8px;color:#9aa0a6">Welcome! Type your text above to encode it as DNA.</p>
 
     <div class="tabs">
       <button class="tab active" data-tab="encode">encode</button>
@@ -238,7 +258,7 @@
       <!-- Live flux banner -->
       <div class="flux-banner loading" id="flux-banner">
         <div class="flux-dot loading" id="flux-dot"></div>
-        <span id="flux-text">Fetching live solar proton flux from NOAA GOES satellite...</span>
+        <span id="flux-text">Using calibrated fallback rates — fetching live NOAA GOES data...</span>
       </div>
 
       <div class="card">
@@ -284,6 +304,26 @@
         </div>
       </div>
 
+      <!-- RS PARITY SLIDER -->
+      <div class="card">
+        <div class="card-label">Reed-Solomon error correction parity</div>
+        <div class="rs-parity-wrap">
+          <div><span class="rs-parity-display" id="rs-parity-display">8</span><span class="rs-parity-unit">parity bytes</span></div>
+          <input type="range" class="rs-parity-slider" id="rs-parity-slider" min="0" max="32" value="8" step="2">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#444">
+            <span>0 (none)</span><span>8</span><span>16</span><span>24</span><span>32</span>
+          </div>
+          <div class="rs-info-row" id="rs-info-row">
+            <div class="rs-info-chip">corrects up to <strong id="rs-t-val">4</strong> byte errors</div>
+            <div class="rs-info-chip">overhead: <strong id="rs-overhead-val">~33%</strong> extra bases</div>
+            <div class="rs-info-chip" id="rs-mode-chip">mode: <strong>active</strong></div>
+          </div>
+          <div style="font-size:11px;color:#555;margin-top:4px">
+            Parity bytes are encoded as extra bases prepended to the strand. Set to 0 to disable.
+          </div>
+        </div>
+      </div>
+
       <div style="margin-bottom:12px">
         <button class="btn btn-danger" id="rad-run">Simulate radiation damage</button>
       </div>
@@ -315,6 +355,20 @@
           <div class="card-label">Base-by-base comparison <span style="color:#444">(damaged bases only)</span></div>
           <div id="rad-comparison" style="max-height:320px;overflow-y:auto;padding-top:4px"></div>
         </div>
+
+        <!-- RS RECOVERY RESULT CARD -->
+        <div class="rs-recovery-card" id="rs-result-card" style="display:none">
+          <div class="card-label" style="margin-bottom:10px">Reed-Solomon recovery attempt</div>
+          <div class="rs-stats-row">
+            <div class="stat-box"><div class="stat-num" id="rsr-parity"></div><div class="stat-name">parity bytes</div></div>
+            <div class="stat-box"><div class="stat-num" id="rsr-repaired"></div><div class="stat-name">bases repaired</div></div>
+            <div class="stat-box"><div class="stat-num" id="rsr-unrecoverable"></div><div class="stat-name">unrecoverable</div></div>
+          </div>
+          <div class="card-label" style="margin-bottom:6px">Recovered sequence — <span style="color:#fbbf24">yellow = RS-repaired</span>, <span style="color:#ef4444">red = lost</span></div>
+          <div class="rs-recovered-seq" id="rsr-seq"></div>
+          <div class="rs-decoded-text" id="rsr-text"></div>
+        </div>
+
       </div>
     </div>
 
@@ -468,6 +522,7 @@
 
   <script src="engine.js"></script>
   <script src="radiation.js"></script>
+  <script src="rs.js"></script>
   <script src="explain.js"></script>
   <script src="gc-optimizer.js"></script>
   <script>
@@ -618,10 +673,15 @@
     });
 
     // ---------------------------------------------------------------------------
-    // RADIATION — live NOAA flux fetch
+    // RADIATION — live NOAA flux fetch + RS encode/decode
     // ---------------------------------------------------------------------------
-    let liveFluxData = null;
-    let selectedEnv  = 'leo';
+    let liveFluxData = {
+      flux: 0.5,
+      source: 'calibrated fallback (published average)',
+      timestamp: 'N/A',
+      readings: 0
+    };
+    let selectedEnv = 'leo';
 
     async function loadLiveFlux() {
       const banner = document.getElementById('flux-banner');
@@ -636,15 +696,12 @@
           `Live NOAA GOES data — solar proton flux: ${liveFluxData.flux.toFixed(4)} pfu ` +
           `(≥10 MeV, ${liveFluxData.readings} readings, last: ${liveFluxData.timestamp}) ` +
           `— Source: ${liveFluxData.source}`;
-        document.getElementById('rad-run').disabled = false;
       } catch (err) {
         banner.className = 'flux-banner failed';
         dot.className    = 'flux-dot failed';
         text.textContent =
           'Could not reach NOAA API. Using calibrated fallback rates based on published literature.';
-        // Fallback: quiet-sun average ~0.5 pfu at >=10 MeV
         liveFluxData = { flux: 0.5, source: 'fallback (published average)', timestamp: 'N/A', readings: 0 };
-        document.getElementById('rad-run').disabled = false;
       }
     }
 
@@ -673,25 +730,65 @@
     const durDisplay = document.getElementById('dur-display');
     durSlider.addEventListener('input', () => { durDisplay.textContent = durSlider.value; });
 
-    // Input note
+    // RS parity slider
+    const rsSlider        = document.getElementById('rs-parity-slider');
+    const rsParityDisplay = document.getElementById('rs-parity-display');
+    const rsTVal          = document.getElementById('rs-t-val');
+    const rsOverheadVal   = document.getElementById('rs-overhead-val');
+    const rsModeChip      = document.getElementById('rs-mode-chip');
+
+    function updateRsInfo() {
+      const p = parseInt(rsSlider.value);
+      rsParityDisplay.textContent = p;
+      rsTVal.textContent = Math.floor(p / 2);
+      // each parity byte = 4 bases overhead on top of data bases
+      // overhead % relative to data portion shown roughly
+      const dataBases = (encode(document.getElementById('rad-in').value || 'x')).length;
+      const parityBases = p * 4;
+      const pct = dataBases > 0 ? ((parityBases / dataBases) * 100).toFixed(0) : '—';
+      rsOverheadVal.textContent = p === 0 ? '0%' : `~${pct}% extra bases`;
+      rsModeChip.innerHTML = p === 0
+        ? 'mode: <strong style="color:#f87171">disabled</strong>'
+        : 'mode: <strong style="color:#6ee7b7">active</strong>';
+    }
+    rsSlider.addEventListener('input', updateRsInfo);
     document.getElementById('rad-in').addEventListener('input', () => {
+      updateRsInfo();
       const note = document.getElementById('rad-input-note');
       const val  = document.getElementById('rad-in').value;
       note.textContent = val ? encode(val).length + ' bases will be simulated' : '';
     });
-
-    // Disable run button until flux loaded
-    document.getElementById('rad-run').disabled = true;
+    updateRsInfo();
 
     // Run simulation
     document.getElementById('rad-run').addEventListener('click', () => {
       const txt = document.getElementById('rad-in').value.trim();
       if (!txt) { alert('Please enter some text to encode first.'); return; }
-      if (!liveFluxData) { alert('Still loading NOAA data. Please wait a moment.'); return; }
 
-      const strand  = encode(txt);
+      const parityBytes = parseInt(rsSlider.value);
+      const useRS       = parityBytes > 0 && typeof RSCodec !== 'undefined';
+
+      // --- RS encode: prepend parity bases to the strand ---
+      let strandToSimulate;
+      let rsCodec = null;
+      let originalBytes = null;
+      if (useRS) {
+        try {
+          rsCodec       = new RSCodec(parityBytes);
+          originalBytes = textToBytes(txt);
+          const encoded = rsCodec.encode(originalBytes);   // Uint8Array with parity appended
+          strandToSimulate = encodeBytes(Array.from(encoded));
+        } catch (e) {
+          console.warn('RS encode failed, falling back to plain strand:', e);
+          strandToSimulate = encode(txt);
+          rsCodec = null;
+        }
+      } else {
+        strandToSimulate = encode(txt);
+      }
+
       const years   = parseInt(durSlider.value);
-      const results = simulateRadiation(strand, selectedEnv, years, liveFluxData.flux);
+      const results = simulateRadiation(strandToSimulate, selectedEnv, years, liveFluxData.flux);
       const summary = summarizeDamage(results);
 
       document.getElementById('rad-results').style.display = 'block';
@@ -703,20 +800,23 @@
       document.getElementById('rs-breaks').textContent   = summary.unreadable;
 
       // Recovery banner
-      const banner = document.getElementById('rad-recovery-banner');
-      const pct = (summary.damageFraction * 100).toFixed(2);
-      const envLabel = ENVIRONMENTS[selectedEnv].label;
+      const banner    = document.getElementById('rad-recovery-banner');
+      const pct       = (summary.damageFraction * 100).toFixed(2);
+      const envLabel  = ENVIRONMENTS[selectedEnv].label;
+      const rsNote    = useRS
+        ? ` RS-${parityBytes} parity active (can correct up to ${Math.floor(parityBytes/2)} byte errors).`
+        : ' No error correction applied.';
       if (summary.recoverable) {
         banner.className = 'recovery-banner ok';
         banner.innerHTML =
           `✓ <strong>Data likely recoverable.</strong> ${pct}% of bases damaged after ${years} year(s) in ${envLabel}. ` +
-          `Within the ~5% threshold where Reed-Solomon error correction could restore the original sequence. ` +
+          `Within the ~5% threshold where Reed-Solomon error correction could restore the original sequence.${rsNote} ` +
           `Live flux used: ${liveFluxData.flux.toFixed(4)} pfu (${liveFluxData.source}).`;
       } else {
         banner.className = 'recovery-banner bad';
         banner.innerHTML =
           `✗ <strong>Data integrity compromised.</strong> ${pct}% of bases damaged after ${years} year(s) in ${envLabel}. ` +
-          `Beyond the ~5% threshold for standard error correction without heavy redundancy. ` +
+          `Beyond the ~5% threshold for standard error correction without heavy redundancy.${rsNote} ` +
           `Live flux used: ${liveFluxData.flux.toFixed(4)} pfu (${liveFluxData.source}).`;
       }
 
@@ -776,6 +876,117 @@
         }
       }
 
+      // --- RS decode: attempt recovery ---
+      const rsCard = document.getElementById('rs-result-card');
+      if (useRS && rsCodec) {
+        rsCard.style.display = 'block';
+
+        // Build damaged strand string from results
+        const damagedStrand = results.map(r => r.result).join('');
+
+        // Decode damaged strand back to bytes (strand breaks become erasures: use 0x00 placeholder)
+        const damagedBytes = [];
+        const erasurePositions = [];
+        for (let i = 0; i < damagedStrand.length; i += 4) {
+          const chunk = damagedStrand.slice(i, i + 4);
+          // Check for strand breaks (X characters)
+          if (chunk.includes('X')) {
+            damagedBytes.push(0);   // placeholder
+            erasurePositions.push(damagedBytes.length - 1);
+          } else {
+            try {
+              const decoded = decodeStrand(chunk);
+              damagedBytes.push(decoded[0] !== undefined ? decoded[0] : 0);
+            } catch {
+              damagedBytes.push(0);
+              erasurePositions.push(damagedBytes.length - 1);
+            }
+          }
+        }
+
+        let recoveredBytes = null;
+        let repairedCount  = 0;
+        let unrecoverable  = 0;
+        let status         = 'failed';
+        let decodedText    = '';
+
+        try {
+          const recovered = rsCodec.decode(new Uint8Array(damagedBytes), erasurePositions);
+          recoveredBytes  = recovered;
+
+          // Count repairs by comparing damagedBytes to recoveredBytes (data portion only)
+          const dataLen = originalBytes.length;
+          for (let i = 0; i < dataLen; i++) {
+            if (damagedBytes[i] !== recoveredBytes[i]) repairedCount++;
+          }
+
+          // Convert data portion only back to text
+          decodedText = bytesToText(Array.from(recoveredBytes.slice(0, dataLen)));
+          status      = decodedText === txt ? 'full' : 'partial';
+        } catch (e) {
+          // RS decode failed — too many errors
+          unrecoverable = erasurePositions.length + changed.length;
+          status = 'failed';
+          decodedText = 'Recovery failed — damage exceeds RS correction capacity.';
+        }
+
+        // Stats
+        document.getElementById('rsr-parity').textContent       = parityBytes;
+        document.getElementById('rsr-repaired').textContent     = repairedCount;
+        document.getElementById('rsr-unrecoverable').textContent = unrecoverable;
+        document.getElementById('rsr-repaired').className       = 'stat-num ' + (repairedCount > 0 ? 'warn' : 'good');
+        document.getElementById('rsr-unrecoverable').className  = 'stat-num ' + (unrecoverable > 0 ? 'danger' : 'good');
+
+        // Recovered sequence visual
+        const rsSeqEl = document.getElementById('rsr-seq');
+        rsSeqEl.innerHTML = '';
+        if (recoveredBytes) {
+          const recoveredStrand = encodeBytes(Array.from(recoveredBytes));
+          for (let i = 0; i < recoveredStrand.length; i++) {
+            const span = document.createElement('span');
+            const origBase = strandToSimulate[i];
+            const dmgBase  = results[i] ? results[i].result : origBase;
+            const recBase  = recoveredStrand[i];
+            if (dmgBase === 'X' || dmgBase !== origBase) {
+              if (recBase === origBase) {
+                span.className = 'rs-base-repaired';
+              } else {
+                span.className = 'rs-base-lost';
+              }
+            } else {
+              span.className = 'rs-base-ok';
+            }
+            span.textContent = recBase;
+            rsSeqEl.appendChild(span);
+          }
+        } else {
+          rsSeqEl.innerHTML = '<span style="color:#ef4444">Unable to reconstruct sequence.</span>';
+        }
+
+        // Decoded text
+        const rsTextEl = document.getElementById('rsr-text');
+        rsTextEl.className = 'rs-decoded-text ' + status;
+        if (status === 'full') {
+          rsTextEl.textContent = `✓ Full recovery — "${decodedText}"`;
+        } else if (status === 'partial') {
+          rsTextEl.textContent = `~ Partial recovery — "${decodedText}"`;
+        } else {
+          rsTextEl.textContent = decodedText;
+        }
+
+      } else if (!useRS) {
+        rsCard.style.display = 'none';
+      } else {
+        rsCard.style.display = 'block';
+        document.getElementById('rsr-parity').textContent        = parityBytes;
+        document.getElementById('rsr-repaired').textContent      = '—';
+        document.getElementById('rsr-unrecoverable').textContent = '—';
+        document.getElementById('rsr-seq').textContent           = 'rs.js not loaded';
+        const rsTextEl = document.getElementById('rsr-text');
+        rsTextEl.className   = 'rs-decoded-text failed';
+        rsTextEl.textContent = 'RS library (rs.js) not available.';
+      }
+
       document.getElementById('rad-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
@@ -791,17 +1002,14 @@
       const steps = document.getElementById('ex-steps');
       steps.innerHTML = '';
 
-      // Row: character → byte
       const r1 = document.createElement('div'); r1.className = 'char-step';
       r1.innerHTML = `<span class="step-label">Character</span><span class="step-val" style="color:#fff;font-size:20px;font-weight:700">"${info.char}"</span><span style="color:#444;margin:0 8px">→</span><span class="step-val">byte <strong style="color:#fff">${info.byte}</strong></span>`;
       steps.appendChild(r1);
 
-      // Row: byte → binary
       const r2 = document.createElement('div'); r2.className = 'char-step';
       r2.innerHTML = `<span class="step-label">Binary</span><span class="step-val">${info.binary}</span>`;
       steps.appendChild(r2);
 
-      // Row: binary → 4 diads
       const r3 = document.createElement('div'); r3.className = 'char-step';
       const diadsHtml = info.diads.map((d, i) =>
         `<span class="diad" style="background:${BASE_BG[info.bases[i]]};color:${BASE_COLOR[info.bases[i]]}">${d}</span>`
@@ -809,7 +1017,6 @@
       r3.innerHTML = `<span class="step-label">Split</span><span class="step-val">${diadsHtml}</span>`;
       steps.appendChild(r3);
 
-      // Row: diads → bases
       const r4 = document.createElement('div'); r4.className = 'char-step';
       const basesHtml = info.bases.map(b =>
         `<span class="base-chip" style="background:${BASE_BG[b]};color:${BASE_COLOR[b]}">${b}</span>`
@@ -817,7 +1024,6 @@
       r4.innerHTML = `<span class="step-label">Bases</span><span class="step-val">${basesHtml}</span>`;
       steps.appendChild(r4);
 
-      // Row: final strand
       const r5 = document.createElement('div'); r5.className = 'char-step';
       r5.innerHTML = `<span class="step-label">Result</span><span class="step-val" style="font-size:18px;letter-spacing:2px">${
         info.bases.map(b => `<span style="color:${BASE_COLOR[b]};font-weight:700">${b}</span>`).join('')
@@ -828,7 +1034,6 @@
     const exChar = document.getElementById('ex-char');
     exChar.addEventListener('input', () => renderCharBreakdown(exChar.value[0] || ''));
 
-    // Only render once the explain tab is opened (elements may not exist yet otherwise)
     let explainInitialized = false;
     document.querySelectorAll('.tab').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -840,7 +1045,6 @@
       });
     });
 
-    // GC slider
     const gcSlider  = document.getElementById('ex-gc-slider');
     const gcFill    = document.getElementById('ex-gc-fill');
     const gcVerdict = document.getElementById('ex-gc-verdict');
@@ -902,7 +1106,6 @@
 
       document.getElementById('opt-strand').textContent = result.strand;
 
-      // Round-trip verify
       try {
         const recovered = decodeOptimizedText(result.strand);
         document.getElementById('opt-decoded').textContent = recovered === txt

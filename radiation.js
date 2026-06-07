@@ -1,36 +1,93 @@
-
 const ENVIRONMENTS = {
   leo: {
     label: 'Low Earth Orbit (ISS)',
     description: 'Protected by Earth\'s magnetic field. Moderate radiation.',
     baseDamageRate:  0.00001,   // events per base per year
     strandBreakRate: 0.000001,
+    fallbackFlux: 0.3,          // mSv/day — ISS average (~110 mSv/yr)
   },
   lunar: {
     label: 'Lunar Surface',
     description: 'No magnetic field. Higher solar particle exposure.',
     baseDamageRate:  0.00008,
     strandBreakRate: 0.000008,
+    fallbackFlux: 1.37,         // mSv/day — LRO/CRaTER measurements (~0.5 Sv/yr surface)
   },
   mars: {
     label: 'Mars Surface',
-    description: 'Thin atmosphere, no global magnetic field. Significant GCR exposure.',
+    description: 'Thin atmosphere, no global magnetic field. Significant GCR exposure. ' +
+                 'MSL/RAD instrument measured ~0.64 mSv/day on the surface (Hassler et al. 2014).',
     baseDamageRate:  0.0002,
     strandBreakRate: 0.00002,
+    fallbackFlux: 0.64,         // mSv/day — MSL/RAD surface measurement (Hassler et al. 2014)
   },
   deepspace: {
     label: 'Deep Space (beyond Mars)',
     description: 'No planetary protection. Full galactic cosmic ray exposure.',
     baseDamageRate:  0.0006,
     strandBreakRate: 0.00006,
+    fallbackFlux: 1.84,         // mSv/day — Curiosity cruise-phase RAD average (~0.67 Sv/yr)
   },
   europa: {
     label: 'Europa Orbit (Jupiter)',
     description: 'Trapped in Jupiter\'s massive radiation belts. Extreme environment.',
     baseDamageRate:  0.004,
     strandBreakRate: 0.0004,
+    fallbackFlux: 5600,         // mSv/day — estimated Jovian belt flux at Europa's orbit
   },
 };
+
+// ---------------------------------------------------------------------------
+// Live flux fetch
+// ---------------------------------------------------------------------------
+
+/**
+ * Attempt to fetch a live radiation flux reading for the given environment.
+ *
+ * Currently only LEO has a public real-time data source (NASA's SpaceWeather
+ * DONKI API).  All other environments fall back to the mission-dosimetry
+ * constants stored in ENVIRONMENTS[env].fallbackFlux.
+ *
+ * @param {string} environment — key from ENVIRONMENTS
+ * @returns {Promise<{ flux: number, source: 'live'|'fallback', units: string }>}
+ */
+async function fetchLiveFlux(environment) {
+  const env = ENVIRONMENTS[environment];
+  if (!env) throw new Error(`Unknown environment: ${environment}`);
+
+  if (environment === 'leo') {
+    try {
+      // NASA DONKI solar energetic particle endpoint — no API key required for
+      // basic queries.  We grab the most recent 7-day window and take the last
+      // reported flux value.
+      const today = new Date();
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const fmt = d => d.toISOString().slice(0, 10);
+      const url =
+        `https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/SEP` +
+        `?startDate=${fmt(weekAgo)}&endDate=${fmt(today)}&speed=&halfAngle=&catalog=ALL&keyword=NONE`;
+
+      const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) throw new Error(`DONKI HTTP ${res.status}`);
+
+      const events = await res.json();
+      if (Array.isArray(events) && events.length > 0) {
+        // Pull the peak flux from the most recent event (units: pfu = particles/cm²/s/sr)
+        const latest = events[events.length - 1];
+        const flux = latest?.peakIntensity ?? null;
+        if (flux !== null && isFinite(flux)) {
+          return { flux, source: 'live', units: 'pfu' };
+        }
+      }
+      // Fall through if no events in window
+    } catch (_) {
+      // Network error or timeout — fall through to fallback
+    }
+  }
+
+  return { flux: env.fallbackFlux, source: 'fallback', units: 'mSv/day' };
+}
+
 
 // ---------------------------------------------------------------------------
 // Damage types
@@ -51,7 +108,7 @@ const BASES = ['A', 'C', 'G', 'T'];
  * @param {string} base
  * @returns {string}
  */
-function mutatBase(base) {
+function mutateBase(base) {
   const others = BASES.filter(b => b !== base.toUpperCase());
   return others[Math.floor(Math.random() * others.length)];
 }
@@ -122,7 +179,7 @@ function simulateRadiation(strand, environment, years, seed = Date.now()) {
     // Check for base damage event
     const damageProb = 1 - Math.pow(1 - env.baseDamageRate, years);
     if (rand() < damageProb) {
-      const mutated = mutatBase(base);
+      const mutated = mutateBase(base);
       results.push({ index: i, original: base, result: mutated, damageType: DAMAGE.BASE_CHANGE });
       continue;
     }
@@ -189,6 +246,7 @@ function summarizeDamage(results) {
 const RadiationEngine = {
   ENVIRONMENTS,
   DAMAGE,
+  fetchLiveFlux,
   simulateRadiation,
   summarizeDamage,
 };
@@ -198,6 +256,7 @@ if (typeof module !== 'undefined' && module.exports) {
 } else if (typeof window !== 'undefined') {
   window.RadiationEngine = RadiationEngine;
   // Also expose globals used by inline scripts
+  window.fetchLiveFlux     = fetchLiveFlux;
   window.simulateRadiation = simulateRadiation;
   window.summarizeDamage   = summarizeDamage;
   window.ENVIRONMENTS      = ENVIRONMENTS;
